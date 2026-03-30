@@ -1,0 +1,4511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>エステサロン 電子カルテ</title>
+  <style>
+/* ============================================================
+   ESTHE CRM - Main Stylesheet
+   Rose/Pink Esthetic Salon Theme
+   ============================================================ */
+
+:root {
+  --primary: #d4637a;
+  --primary-light: #f8e8ec;
+  --primary-dark: #b84d62;
+  --accent: #8b6b8a;
+  --bg: #faf7f8;
+  --sidebar-bg: #2d1f2e;
+  --sidebar-text: #e8d5e8;
+  --white: #ffffff;
+  --text: #2d2535;
+  --text-muted: #9e8fa0;
+  --border: #ead5da;
+  --success: #52b788;
+  --warning: #e9950f;
+  --info: #5b9bd5;
+  --danger: #e05555;
+  --card-shadow: 0 2px 12px rgba(180, 60, 90, 0.08);
+  --sidebar-width: 240px;
+  --transition: all 0.2s ease;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 16px;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'Yu Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--sidebar-text);
+  opacity: 0.7;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--sidebar-text);
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(212,99,122,0.25), rgba(139,107,138,0.2));
+  color: #fff;
+  border: 1px solid rgba(212,99,122,0.3);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--primary);
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-step {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+  min-width: 44px;
+  opacity: 0.85;
+}
+
+.nav-icon {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.staff-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--sidebar-text);
+  opacity: 0.7;
+}
+
+.staff-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+}
+
+#app-container {
+  padding: 28px 32px;
+  min-height: 100%;
+}
+
+/* ============================================================
+   VIEW HEADERS
+   ============================================================ */
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.view-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-title h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.view-title .step-badge {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+
+.view-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-新規 { background: #e8f0fb; color: #5b9bd5; }
+.status-来店 { background: #e8f5ee; color: #52b788; }
+.status-契約 { background: #fef3e2; color: #e9950f; }
+.status-フォロー中 { background: #f3eef5; color: #8b6b8a; }
+.status-失客 { background: #fdeaea; color: #e05555; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  transition: var(--transition);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--white);
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212,99,122,0.3);
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+  background: var(--bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--white);
+}
+.btn-danger:hover {
+  background: #cc4444;
+}
+
+.btn-success {
+  background: var(--success);
+  color: var(--white);
+}
+.btn-success:hover {
+  background: #3fa070;
+}
+
+.btn-line {
+  background: #06C755;
+  color: var(--white);
+}
+.btn-line:hover {
+  background: #05a845;
+}
+
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: var(--danger);
+}
+
+.form-input, .form-select, .form-textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--text);
+  font-size: 13px;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(212,99,122,0.1);
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239e8fa0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.form-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ============================================================
+   CUSTOMERS VIEW
+   ============================================================ */
+.customers-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  height: calc(100vh - 56px);
+  align-items: start;
+}
+
+.customer-list-panel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 112px);
+  overflow: hidden;
+}
+
+.customer-list-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.search-input-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.search-input {
+  width: 100%;
+  padding: 9px 12px 9px 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: var(--bg);
+  transition: var(--transition);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(212,99,122,0.1);
+}
+
+.status-filters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-btn.active, .filter-btn:hover {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.customer-list-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.customer-card-item {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+
+.customer-card-item:hover {
+  background: var(--primary-light);
+  border-color: rgba(212,99,122,0.15);
+}
+
+.customer-card-item.selected {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.customer-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.customer-name-main {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.customer-furigana {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.customer-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.customer-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.concern-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.concern-tag {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+/* Customer Detail Panel */
+.customer-detail-panel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow-y: auto;
+  max-height: calc(100vh - 112px);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.empty-sub {
+  font-size: 12px;
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+.detail-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--primary-light), rgba(248,232,236,0));
+}
+
+.detail-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detail-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.detail-furigana {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.detail-header-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.status-select-inline {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--white);
+  cursor: pointer;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-item label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.info-item span, .info-item a {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.info-item a {
+  color: var(--primary);
+}
+
+.info-item .line-id-input {
+  width: 100%;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.detail-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.memo-area {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  min-height: 70px;
+  resize: vertical;
+  background: var(--bg);
+}
+
+.memo-area:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(212,99,122,0.1);
+  background: var(--white);
+}
+
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.treatment-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.treatment-table th {
+  text-align: left;
+  padding: 8px 10px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.treatment-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.treatment-table tr:last-child td {
+  border-bottom: none;
+}
+
+.treatment-table tr:hover td {
+  background: var(--bg);
+}
+
+.line-sent-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.line-sent-yes { background: #e8f5ee; color: #52b788; }
+.line-sent-no { background: var(--bg); color: var(--text-muted); }
+
+/* ============================================================
+   COUNSELING VIEW
+   ============================================================ */
+.counseling-layout {
+  max-width: 860px;
+}
+
+.counseling-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.counseling-history-item {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  background: var(--bg);
+}
+
+.counseling-history-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.counseling-history-meta strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.counseling-history-content {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   ANALYSIS VIEW
+   ============================================================ */
+.analysis-layout {
+  max-width: 900px;
+}
+
+.score-ring-container {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, var(--primary-light), rgba(248,232,236,0.3));
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  border: 1px solid rgba(212,99,122,0.15);
+}
+
+.score-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.score-ring-wrap svg {
+  transform: rotate(-90deg);
+}
+
+.score-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.score-number .score-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  display: block;
+  line-height: 1;
+}
+
+.score-number .score-unit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.score-details {
+  flex: 1;
+}
+
+.score-state-label {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.score-description {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.score-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.score-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.score-meta-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.analysis-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.analysis-card-header {
+  padding: 14px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.analysis-card-body {
+  padding: 16px;
+}
+
+.needs-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.needs-item:last-child {
+  border-bottom: none;
+}
+
+.needs-concern {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.needs-treatment {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.priority-HIGH { background: #fdeaea; color: var(--danger); }
+.priority-MEDIUM { background: #fef3e2; color: var(--warning); }
+.priority-LOW { background: #e8f5ee; color: var(--success); }
+
+.recommendation-card {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+
+.recommendation-card:last-child { margin-bottom: 0; }
+
+.rec-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.rec-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rec-sessions {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.rec-reason {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.rec-urgency {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--white);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.risk-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.risk-item:last-child { border-bottom: none; }
+
+.risk-label { color: var(--text-muted); }
+
+.risk-value { font-weight: 600; }
+.risk-ok { color: var(--success); }
+.risk-warn { color: var(--warning); }
+.risk-danger { color: var(--danger); }
+
+.ai-footer-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+  margin-top: 16px;
+}
+
+/* ============================================================
+   CLOSING VIEW
+   ============================================================ */
+.closing-layout {
+  max-width: 860px;
+}
+
+.closing-score-container {
+  background: linear-gradient(135deg, #2d1f2e, #3d2a3e);
+  color: var(--white);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.closing-score-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+.closing-score-value {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.closing-score-suffix {
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+.closing-score-details {
+  flex: 1;
+}
+
+.closing-score-bar-wrap {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  height: 8px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.closing-score-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary), #ff8fa3);
+  transition: width 0.8s ease;
+}
+
+.scenario-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.scenario-tip {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scenario-tip::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  background: var(--primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.scenario-script {
+  background: var(--primary-light);
+  border-left: 3px solid var(--primary);
+  padding: 12px 14px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  font-size: 10px;
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.closing-result-form {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.result-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.result-option {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--white);
+}
+
+.result-option:hover { border-color: var(--primary); color: var(--primary); }
+.result-option.selected-success { border-color: var(--success); background: #e8f5ee; color: var(--success); }
+.result-option.selected-failure { border-color: var(--danger); background: #fdeaea; color: var(--danger); }
+.result-option.selected-pending { border-color: var(--warning); background: #fef3e2; color: var(--warning); }
+
+/* ============================================================
+   CONTRACTS VIEW
+   ============================================================ */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.summary-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.summary-icon-primary { background: var(--primary-light); }
+.summary-icon-warning { background: #fef3e2; }
+.summary-icon-info { background: #e8f0fb; }
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.contracts-table-wrap {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--bg); }
+
+.progress-bar-wrap {
+  background: var(--border);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.progress-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.contract-status-badge {
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-active { background: #e8f5ee; color: var(--success); }
+.status-expired { background: #fdeaea; color: var(--danger); }
+.status-completed { background: var(--bg); color: var(--text-muted); }
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fef3e2;
+  border: 1px solid #f0d080;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: #9a6200;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   FOLLOWUP VIEW
+   ============================================================ */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: var(--transition);
+}
+
+.tab-btn:hover { color: var(--primary); }
+
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.message-type-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.msg-type-btn {
+  padding: 10px 8px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.msg-type-btn:hover { border-color: var(--primary); color: var(--primary); }
+.msg-type-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+.line-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fdeaea;
+  border: 1px solid rgba(224,85,85,0.2);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--danger);
+  margin-bottom: 12px;
+}
+
+.followup-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 24px;
+  max-width: 680px;
+}
+
+.coming-soon {
+  text-align: center;
+  padding: 60px 40px;
+  color: var(--text-muted);
+}
+
+.coming-soon-icon {
+  font-size: 48px;
+  margin-bottom: 14px;
+}
+
+.coming-soon-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   RETROSPECTIVE VIEW
+   ============================================================ */
+.period-filter {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.period-btn {
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.period-btn.active, .period-btn:hover {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.kpi-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 18px;
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.kpi-unit {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.kpi-change {
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.kpi-change.up { color: var(--success); }
+.kpi-change.down { color: var(--danger); }
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.chart-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.chart-body {
+  padding: 16px;
+}
+
+.h-bar-item {
+  margin-bottom: 12px;
+}
+
+.h-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.h-bar-label span:first-child { color: var(--text); }
+.h-bar-label span:last-child { color: var(--text-muted); font-weight: 600; }
+
+.h-bar-track {
+  background: var(--border);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.h-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.donut-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.dist-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dist-label {
+  flex: 1;
+  color: var(--text);
+}
+
+.dist-bar-wrap {
+  flex: 2;
+  background: var(--border);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.dist-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.dist-count {
+  font-weight: 700;
+  color: var(--text);
+  min-width: 20px;
+  text-align: right;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.ranking-item:last-child { border-bottom: none; }
+
+.rank-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.rank-1 { background: #FFD700; color: #5a4400; }
+.rank-2 { background: #C0C0C0; color: #444; }
+.rank-3 { background: #CD7F32; color: #fff; }
+.rank-other { background: var(--border); color: var(--text-muted); }
+
+.rank-name { flex: 1; color: var(--text); }
+.rank-count { font-weight: 700; color: var(--primary); }
+
+.lost-customers-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.improvement-list {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.improvement-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.improvement-item:last-child { border-bottom: none; }
+
+.improvement-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.improvement-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.improvement-text strong {
+  color: var(--primary-dark);
+}
+
+/* ============================================================
+   OPTIMIZATION VIEW
+   ============================================================ */
+.optimization-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pattern-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.pattern-header {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.pattern-header-success { background: #e8f5ee; color: var(--success); }
+.pattern-header-fail { background: #fdeaea; color: var(--danger); }
+
+.pattern-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.pattern-item:last-child { border-bottom: none; }
+
+.pattern-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.bullet-success { background: var(--success); }
+.bullet-fail { background: var(--danger); }
+
+.action-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.action-item:last-child { border-bottom: none; }
+
+.action-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  padding-top: 4px;
+}
+
+.action-text strong { color: var(--primary-dark); }
+
+.ai-advice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.advice-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 18px;
+  border-top: 3px solid var(--primary);
+}
+
+.advice-icon { font-size: 24px; margin-bottom: 10px; }
+.advice-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.advice-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+.data-quality-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.quality-item {
+  margin-bottom: 14px;
+}
+
+.quality-item:last-child { margin-bottom: 0; }
+
+.quality-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.quality-label-row span:first-child { color: var(--text); font-weight: 500; }
+.quality-label-row span:last-child { color: var(--text-muted); }
+
+.quality-bar-wrap {
+  background: var(--border);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.quality-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.upgrade-banner {
+  background: linear-gradient(135deg, #2d1f2e, #4a2d4e);
+  color: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.upgrade-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.upgrade-sub {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  z-index: 1001;
+  width: 90%;
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.modal-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.hidden { display: none !important; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 380px;
+  animation: slideUp 0.3s ease;
+}
+
+.toast.success { background: var(--success); color: var(--white); }
+.toast.error { background: var(--danger); color: var(--white); }
+.toast.warning { background: var(--warning); color: var(--white); }
+.toast.info { background: var(--info); color: var(--white); }
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.text-muted { color: var(--text-muted); font-size: 12px; }
+.text-sm { font-size: 12px; }
+.text-xs { font-size: 11px; }
+.font-bold { font-weight: 700; }
+.w-full { width: 100%; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  :root { --sidebar-width: 60px; }
+
+  .logo-text,
+  .nav-step,
+  .nav-label,
+  .sidebar-footer .staff-info span:last-child {
+    display: none;
+  }
+
+  .logo-icon {
+    margin: 0 auto;
+  }
+
+  .sidebar-logo {
+    justify-content: center;
+    padding: 16px 10px;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .nav-icon { width: auto; }
+
+  #app-container { padding: 16px; }
+
+  .customers-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-grid,
+  .kpi-cards,
+  .charts-grid,
+  .ai-advice-grid,
+  .optimization-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-cards { grid-template-columns: 1fr; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .message-type-selector { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .closing-score-container { flex-direction: column; }
+  .score-ring-container { flex-direction: column; }
+  .kpi-cards { grid-template-columns: 1fr 1fr; }
+  .result-options { flex-direction: column; }
+}
+
+/* ============================================================
+   CUSTOMER SELECTOR SHARED
+   ============================================================ */
+.customer-selector-bar {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.customer-selector-bar label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.customer-selector-bar select {
+  flex: 1;
+  max-width: 360px;
+}
+
+/* Past records tables */
+.past-records-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+/* Section divider */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* No data row */
+.no-data-row td {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px !important;
+  font-size: 13px;
+}
+
+/* Price display */
+.price-text {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.price-text::before {
+  content: '¥';
+  font-size: 11px;
+  font-weight: 500;
+  margin-right: 1px;
+}
+
+/* Avatar initials */
+.customer-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">✨</div>
+        <div class="logo-text">
+          <span class="logo-title">ESTHE CRM</span>
+          <span class="logo-sub">電子カルテシステム</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-view="customers">
+          <span class="nav-step">STEP 1</span>
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">顧客一覧</span>
+        </a>
+        <a class="nav-item" data-view="counseling">
+          <span class="nav-step">STEP 2</span>
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">カウンセリング記録</span>
+        </a>
+        <a class="nav-item" data-view="analysis">
+          <span class="nav-step">STEP 3</span>
+          <span class="nav-icon">🔍</span>
+          <span class="nav-label">AI自動分析</span>
+        </a>
+        <a class="nav-item" data-view="closing">
+          <span class="nav-step">STEP 4</span>
+          <span class="nav-icon">💡</span>
+          <span class="nav-label">AIクロージング支援</span>
+        </a>
+        <a class="nav-item" data-view="contracts">
+          <span class="nav-step">STEP 5</span>
+          <span class="nav-icon">📄</span>
+          <span class="nav-label">契約管理</span>
+        </a>
+        <a class="nav-item" data-view="followup">
+          <span class="nav-step">STEP 6</span>
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">アフターフォロー</span>
+        </a>
+        <a class="nav-item" data-view="retrospective">
+          <span class="nav-step">STEP 7</span>
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">振り返り分析</span>
+        </a>
+        <a class="nav-item" data-view="optimization">
+          <span class="nav-step">STEP 8</span>
+          <span class="nav-icon">🚀</span>
+          <span class="nav-label">AI学習・最適化</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="staff-info">
+          <span class="staff-dot"></span>
+          スタッフモード
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="app-container">
+        <!-- Rendered by JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal overlay -->
+  <div id="modal-overlay" class="modal-overlay hidden"></div>
+  <div id="modal-container" class="modal-container hidden"></div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+// ============================================================
+// config.js
+// ============================================================
+// ============================================================
+// GAS Web App URL（デプロイ後に設定）
+// ============================================================
+const GAS_API_URL = 'YOUR_GAS_WEBAPP_URL_HERE';
+
+// GAS URLが設定済みかどうか（自動判定）
+const USE_REAL_API = GAS_API_URL !== 'YOUR_GAS_WEBAPP_URL_HERE';
+
+// 接続対象スプレッドシートのシート名
+const FORM_SHEET_NAME = 'フォームの回答 1';
+
+// ダッシュボードの自動更新間隔（ミリ秒）
+const POLL_INTERVAL_MS = 30000;
+
+// LINE設定
+const LINE_CONFIG = {
+  channelId: '2009604265',
+};
+
+// ステータス定義
+const STATUS_CONFIG = {
+  '新規': { color: '#5b9bd5', bg: '#e8f0fb', icon: '🔵' },
+  '来店': { color: '#52b788', bg: '#e8f5ee', icon: '🟢' },
+  '契約': { color: '#e9950f', bg: '#fef3e2', icon: '🟡' },
+  'フォロー中': { color: '#8b6b8a', bg: '#f3eef5', icon: '🟣' },
+  '失客': { color: '#e05555', bg: '#fdeaea', icon: '🔴' },
+};
+
+// AIスコア閾値
+const AI_SCORE_THRESHOLDS = {
+  HIGH: 75,
+  MEDIUM: 50,
+  LOW: 0,
+};
+
+
+// ============================================================
+// data.js
+// ============================================================
+// ============================================================
+// ESTHE CRM - Data Layer
+// ============================================================
+
+// サンプル顧客データ（5名）
+let CUSTOMERS = [
+  {
+    id: 'C0001',
+    name: '田中 美咲',
+    furigana: 'たなか みさき',
+    phone: '090-1234-5678',
+    email: 'misaki@example.com',
+    lineUserId: 'U1234567890abcdef',
+    registeredDate: '2024-01-15',
+    status: '契約',
+    birthdate: '1990-05-20',
+    age: 34,
+    skinType: '混合肌',
+    concerns: ['毛穴', 'くすみ', '乾燥'],
+    treatmentCount: 8,
+    lastVisit: '2024-03-10',
+    staff: '山本 さくら',
+    memo: 'ホワイトニングに興味あり。予算は月3万円程度。',
+    contractId: 'CT0001',
+  },
+  {
+    id: 'C0002',
+    name: '鈴木 花子',
+    furigana: 'すずき はなこ',
+    phone: '090-2345-6789',
+    email: 'hanako@example.com',
+    lineUserId: 'U2345678901abcdef',
+    registeredDate: '2024-02-01',
+    status: '来店',
+    birthdate: '1985-09-12',
+    age: 38,
+    skinType: '乾燥肌',
+    concerns: ['シミ', '乾燥', 'たるみ'],
+    treatmentCount: 3,
+    lastVisit: '2024-03-05',
+    staff: '山本 さくら',
+    memo: '敏感肌気味。強めの施術は避ける。',
+    contractId: null,
+  },
+  {
+    id: 'C0003',
+    name: '佐藤 奈々',
+    furigana: 'さとう なな',
+    phone: '090-3456-7890',
+    email: 'nana@example.com',
+    lineUserId: 'U3456789012abcdef',
+    registeredDate: '2024-01-20',
+    status: '契約',
+    birthdate: '1995-03-28',
+    age: 29,
+    skinType: '脂性肌',
+    concerns: ['たるみ', 'ほうれい線', 'くすみ'],
+    treatmentCount: 12,
+    lastVisit: '2024-03-15',
+    staff: '田村 あかね',
+    memo: '結婚式に向けてケア中。6月が本番。',
+    contractId: 'CT0002',
+  },
+  {
+    id: 'C0004',
+    name: '山田 愛',
+    furigana: 'やまだ あい',
+    phone: '090-4567-8901',
+    email: 'ai@example.com',
+    lineUserId: '',
+    registeredDate: '2024-03-01',
+    status: '新規',
+    birthdate: '1998-11-05',
+    age: 25,
+    skinType: '混合肌',
+    concerns: ['ニキビ跡', '毛穴', '色むら'],
+    treatmentCount: 1,
+    lastVisit: '2024-03-01',
+    staff: '田村 あかね',
+    memo: '',
+    contractId: null,
+  },
+  {
+    id: 'C0005',
+    name: '伊藤 ゆり',
+    furigana: 'いとう ゆり',
+    phone: '090-5678-9012',
+    email: 'yuri@example.com',
+    lineUserId: 'U5678901234abcdef',
+    registeredDate: '2024-02-15',
+    status: 'フォロー中',
+    birthdate: '1988-07-30',
+    age: 35,
+    skinType: '普通肌',
+    concerns: ['毛穴', '乾燥', 'シミ'],
+    treatmentCount: 5,
+    lastVisit: '2024-02-28',
+    staff: '山本 さくら',
+    memo: '前回施術後に少し赤みが出た。次回は様子見。',
+    contractId: null,
+  },
+];
+
+// サンプル施術履歴
+let TREATMENTS = [
+  { id: 'T0001', customerId: 'C0001', date: '2024-03-10', content: 'ハーブピーリング + 美白導入', staff: '山本 さくら', price: 18000, beforeImage: '', afterImage: '', memo: '毛穴目立ち改善', lineSent: true },
+  { id: 'T0002', customerId: 'C0001', date: '2024-02-15', content: '超音波フェイシャル', staff: '山本 さくら', price: 15000, beforeImage: '', afterImage: '', memo: '', lineSent: true },
+  { id: 'T0003', customerId: 'C0001', date: '2024-01-20', content: 'スペシャルモイスチャーケア', staff: '山本 さくら', price: 12000, beforeImage: '', afterImage: '', memo: '', lineSent: false },
+  { id: 'T0004', customerId: 'C0002', date: '2024-03-05', content: 'イオン導入 保湿ケア', staff: '山本 さくら', price: 10000, beforeImage: '', afterImage: '', memo: '敏感肌対応', lineSent: false },
+  { id: 'T0005', customerId: 'C0003', date: '2024-03-15', content: 'HIFU（ハイフ）リフトアップ', staff: '田村 あかね', price: 25000, beforeImage: '', afterImage: '', memo: '効果実感あり', lineSent: true },
+  { id: 'T0006', customerId: 'C0004', date: '2024-03-01', content: 'カウンセリング + 毛穴洗浄', staff: '田村 あかね', price: 8000, beforeImage: '', afterImage: '', memo: '初回割引適用', lineSent: false },
+  { id: 'T0007', customerId: 'C0005', date: '2024-02-28', content: 'アロマフェイシャル', staff: '山本 さくら', price: 12000, beforeImage: '', afterImage: '', memo: '次回は薬草蒸しを提案', lineSent: true },
+];
+
+// サンプル契約データ
+let CONTRACTS = [
+  { id: 'CT0001', customerId: 'C0001', customerName: '田中 美咲', type: '回数券', content: 'プレミアムホワイトニングコース', totalSessions: 10, usedSessions: 8, startDate: '2024-01-15', endDate: '2024-12-15', totalPrice: 150000, paidPrice: 150000, status: 'active', staff: '山本 さくら' },
+  { id: 'CT0002', customerId: 'C0003', customerName: '佐藤 奈々', type: '役務', content: 'ブライダルフルコース', totalSessions: 15, usedSessions: 12, startDate: '2024-01-20', endDate: '2024-06-30', totalPrice: 200000, paidPrice: 200000, status: 'active', staff: '田村 あかね' },
+];
+
+// サンプルカウンセリングデータ
+let COUNSELINGS = [
+  { id: 'CS0001', customerId: 'C0001', date: '2024-01-15', staffMemo: '初回カウンセリング。毛穴・くすみが主な悩み。ホワイトニングに強い関心。予算は月3万円。週1ペースで通える。', goals: '全体的な肌質改善・均一なトーン', lifestyle: '在宅勤務、日焼け止めは使用、スキンケアは基本のみ', allergies: 'なし', medicines: 'なし', followUpNeeded: false },
+];
+
+// 商談記録
+let CLOSING_RESULTS = [];
+
+// LINE送信履歴
+let LINE_HISTORY = [
+  { id: 'L0001', customerId: 'C0001', customerName: '田中 美咲', date: '2024-03-10', type: 'お礼メッセージ', message: 'ご来店ありがとうございました。本日の施術はいかがでしたか？', status: '送信済み' },
+  { id: 'L0002', customerId: 'C0003', customerName: '佐藤 奈々', date: '2024-03-15', type: 'ビフォーアフター', message: 'HAIFUの効果をご確認ください。変化を実感していただけましたでしょうか？', status: '送信済み' },
+  { id: 'L0003', customerId: 'C0005', customerName: '伊藤 ゆり', date: '2024-02-28', type: 'フォローアップ', message: '施術後のお肌の状態はいかがでしょうか？何かご不安な点がありましたらお気軽にご相談ください。', status: '送信済み' },
+];
+
+// ============================================================
+// データアクセス関数
+// ============================================================
+function getCustomers() { return CUSTOMERS; }
+function getCustomerById(id) { return CUSTOMERS.find(c => c.id === id); }
+function getTreatmentsByCustomerId(id) { return TREATMENTS.filter(t => t.customerId === id); }
+function getContractByCustomerId(id) { return CONTRACTS.find(c => c.customerId === id); }
+function getCounselingByCustomerId(id) { return COUNSELINGS.filter(c => c.customerId === id); }
+function getContracts() { return CONTRACTS; }
+function getLineHistory() { return LINE_HISTORY; }
+function getClosingResults() { return CLOSING_RESULTS; }
+
+function updateCustomerStatus(id, status) {
+  const c = CUSTOMERS.find(c => c.id === id);
+  if (c) c.status = status;
+}
+
+function updateCustomerMemo(id, memo) {
+  const c = CUSTOMERS.find(c => c.id === id);
+  if (c) c.memo = memo;
+}
+
+function updateCustomerLineId(id, lineUserId) {
+  const c = CUSTOMERS.find(c => c.id === id);
+  if (c) c.lineUserId = lineUserId;
+}
+
+function addTreatment(data) {
+  const id = 'T' + String(TREATMENTS.length + 1).padStart(4, '0');
+  TREATMENTS.push({ id, ...data, lineSent: false });
+  const c = CUSTOMERS.find(c => c.id === data.customerId);
+  if (c) { c.treatmentCount++; c.lastVisit = data.date; }
+  return id;
+}
+
+function saveCounseling(data) {
+  const id = 'CS' + String(COUNSELINGS.length + 1).padStart(4, '0');
+  COUNSELINGS.push({ id, ...data });
+  return id;
+}
+
+function saveClosingResult(data) {
+  const id = 'CR' + String(CLOSING_RESULTS.length + 1).padStart(4, '0');
+  CLOSING_RESULTS.push({ id, ...data });
+  return id;
+}
+
+function addContract(data) {
+  const id = 'CT' + String(CONTRACTS.length + 1).padStart(4, '0');
+  CONTRACTS.push({ id, ...data, status: 'active' });
+  const c = CUSTOMERS.find(c => c.id === data.customerId);
+  if (c) { c.contractId = id; if (c.status === '来店') c.status = '契約'; }
+  return id;
+}
+
+function addLineHistory(data) {
+  const id = 'L' + String(LINE_HISTORY.length + 1).padStart(4, '0');
+  LINE_HISTORY.push({ id, ...data, status: '送信済み' });
+  // Mark treatment as lineSent
+  const treats = TREATMENTS.filter(t => t.customerId === data.customerId);
+  if (treats.length > 0) {
+    treats[treats.length - 1].lineSent = true;
+  }
+  return id;
+}
+
+// ============================================================
+// AI分析エンジン（ルールベース）
+// ============================================================
+function analyzeCustomer(customerId) {
+  const customer = getCustomerById(customerId);
+  if (!customer) return null;
+  const treatments = getTreatmentsByCustomerId(customerId);
+  const counseling = getCounselingByCustomerId(customerId);
+  const contract = getContractByCustomerId(customerId);
+
+  // スコア計算
+  let score = 50;
+  if (customer.treatmentCount >= 5) score += 15;
+  if (customer.treatmentCount >= 10) score += 10;
+  if (contract) score += 20;
+  if (customer.status === '契約') score += 10;
+  if (customer.status === '来店') score += 5;
+  if (customer.lineUserId) score += 5;
+  const daysSinceVisit = Math.floor((new Date('2024-03-28') - new Date(customer.lastVisit)) / (1000 * 60 * 60 * 24));
+  if (daysSinceVisit > 60) score -= 15;
+  if (daysSinceVisit > 90) score -= 10;
+  score = Math.max(0, Math.min(100, score));
+
+  // 状態ラベル
+  let stateLabel, stateColor;
+  if (score >= AI_SCORE_THRESHOLDS.HIGH) {
+    stateLabel = '購買意欲高';
+    stateColor = '#52b788';
+  } else if (score >= AI_SCORE_THRESHOLDS.MEDIUM) {
+    stateLabel = 'フォロー必要';
+    stateColor = '#e9950f';
+  } else {
+    stateLabel = 'リスク顧客';
+    stateColor = '#e05555';
+  }
+
+  // ニーズ分析
+  const needsMap = {
+    '毛穴': { treatment: '毛穴洗浄・ハーブピーリング', priority: 'HIGH' },
+    'くすみ': { treatment: '美白導入・イオン導入', priority: 'HIGH' },
+    'シミ': { treatment: 'フォトフェイシャル・美白ケア', priority: 'HIGH' },
+    '乾燥': { treatment: '保湿スペシャルケア', priority: 'MEDIUM' },
+    'たるみ': { treatment: 'HIFU・リフトアップケア', priority: 'HIGH' },
+    'ほうれい線': { treatment: 'EMS・フェイスリフト', priority: 'HIGH' },
+    'ニキビ跡': { treatment: 'ピーリング・LED光線療法', priority: 'HIGH' },
+    '色むら': { treatment: '美白導入・フォトケア', priority: 'MEDIUM' },
+  };
+  const needs = customer.concerns.map(c => ({
+    concern: c,
+    ...(needsMap[c] || { treatment: '総合フェイシャル', priority: 'MEDIUM' }),
+  }));
+
+  // 提案
+  const recommendations = [];
+  if (customer.concerns.includes('たるみ') || customer.concerns.includes('ほうれい線')) {
+    recommendations.push({ name: 'HAIFUリフトアッププラン', price: 25000, sessions: 6, reason: 'たるみ・ほうれい線への最短アプローチ', urgency: '今がベストタイミング' });
+  }
+  if (customer.concerns.includes('シミ') || customer.concerns.includes('くすみ')) {
+    recommendations.push({ name: 'ホワイトニングコース', price: 18000, sessions: 10, reason: 'シミ・くすみの根本ケア', urgency: '季節の変わり目に効果的' });
+  }
+  if (!contract) {
+    recommendations.push({ name: 'まとめ買いコース（10回）', price: 120000, sessions: 10, reason: '単回比20%お得・継続で効果最大化', urgency: '今月限定特典あり' });
+  }
+  if (recommendations.length === 0) {
+    recommendations.push({ name: 'メンテナンスコース（5回）', price: 65000, sessions: 5, reason: '現在のコース終了後もケアを継続', urgency: '早期申込割引あり' });
+  }
+
+  // クロージングヒント
+  const closingTips = [];
+  if (score >= AI_SCORE_THRESHOLDS.HIGH) {
+    closingTips.push({ tip: '施術効果を具体的に数値で見せる', script: '前回から比べてキメが〇%細かくなっています！このまま続けることで更に効果が持続しますよ。' });
+    closingTips.push({ tip: 'コース提案のタイミング', script: '次のステップとして、まとめてのコースだとより効果が持続します。今月は特別な価格でご案内できます。ぜひご検討ください！' });
+  } else if (score >= AI_SCORE_THRESHOLDS.MEDIUM) {
+    closingTips.push({ tip: '不安要素を丁寧に解消', script: 'ご来店ペースについてお気軽にご相談ください。ライフスタイルに合わせたプランをご提案できます。' });
+    closingTips.push({ tip: 'ビフォーアフターを見せる', script: '同じお悩みだったお客様の変化をご覧いただけますか？〇〇様もきっと同じように変われます！' });
+  } else {
+    closingTips.push({ tip: '再来店のハードルを下げる', script: '期間限定で復活割引をご用意しました。ぜひ一度お顔の状態を見させてください。' });
+    closingTips.push({ tip: 'LINE経由でフォロー', script: '気軽にLINEでご相談いただけます。まずはお肌の近況を教えていただけますか？' });
+  }
+
+  return { score, stateLabel, stateColor, needs, recommendations, closingTips, daysSinceVisit, contract, customer };
+}
+
+// ============================================================
+// API レイヤー（GAS連携）
+// 既存の同期関数はそのまま保持し、APIが使えない場合のフォールバックとして動作。
+// ============================================================
+
+let apiDataCache = {
+  customers: null,
+  lastFetch: null,
+};
+
+/**
+ * GAS Web App API を呼び出す共通関数。
+ * USE_REAL_API が false の場合は null を返す（サンプルデータ使用）。
+ */
+async function fetchFromGAS(action, params) {
+  if (!USE_REAL_API) return null;
+
+  let url = GAS_API_URL + '?action=' + encodeURIComponent(action);
+  if (params) {
+    Object.keys(params).forEach(key => {
+      url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    });
+  }
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'GAS returned error');
+    return json.data;
+  } catch (err) {
+    console.error('[GAS API] ' + action + ' 失敗:', err.message);
+    return null;
+  }
+}
+
+/**
+ * GAS から顧客一覧を読み込み、CUSTOMERSをインプレースで更新。
+ * 既存のrenderXxxView()がCUSTOMERS変数を直接参照しているため、
+ * 参照を保ったままデータを差し替える。
+ */
+async function loadCustomersFromAPI() {
+  if (!USE_REAL_API) return CUSTOMERS;
+
+  const data = await fetchFromGAS('getCustomers');
+  if (!data || !Array.isArray(data)) {
+    console.warn('[GAS API] getCustomers がデータを返しませんでした。サンプルデータを使用します。');
+    return CUSTOMERS;
+  }
+
+  // インプレース更新（参照を保持したまま中身を入れ替え）
+  CUSTOMERS.length = 0;
+  data.forEach(c => CUSTOMERS.push(c));
+
+  apiDataCache.customers = data;
+  apiDataCache.lastFetch = new Date();
+  return CUSTOMERS;
+}
+
+/**
+ * GAS から契約一覧を読み込み、CONTRACTSをインプレースで更新。
+ */
+async function loadContractsFromAPI() {
+  if (!USE_REAL_API) return CONTRACTS;
+
+  const data = await fetchFromGAS('getContracts');
+  if (!data || !Array.isArray(data)) return CONTRACTS;
+
+  CONTRACTS.length = 0;
+  data.forEach(c => CONTRACTS.push(c));
+  return CONTRACTS;
+}
+
+// ---- 書き込み操作（楽観的更新: ローカルに即時反映 → バックグラウンドでGASに保存） ----
+
+async function apiUpdateStatus(id, status) {
+  updateCustomerStatus(id, status); // ローカル即時反映
+  if (USE_REAL_API) {
+    const result = await fetchFromGAS('updateStatus', { id, status });
+    if (!result) showToast('ステータスのサーバー保存に失敗しました', 'warning');
+  }
+}
+
+async function apiUpdateMemo(id, memo) {
+  updateCustomerMemo(id, memo); // ローカル即時反映
+  if (USE_REAL_API) {
+    const result = await fetchFromGAS('updateMemo', { id, memo });
+    if (!result) showToast('メモのサーバー保存に失敗しました', 'warning');
+  }
+}
+
+async function apiUpdateLineId(id, lineUserId) {
+  updateCustomerLineId(id, lineUserId); // ローカル即時反映
+  if (USE_REAL_API) {
+    const result = await fetchFromGAS('updateLineId', { id, lineUserId });
+    if (!result) showToast('LINE IDのサーバー保存に失敗しました', 'warning');
+  }
+}
+
+async function apiAddTreatment(data) {
+  const localId = addTreatment(data); // ローカル即時反映
+  if (USE_REAL_API) {
+    const result = await fetchFromGAS('addTreatment', { data: JSON.stringify(data) });
+    if (!result) showToast('施術記録のサーバー保存に失敗しました', 'warning');
+  }
+  return localId;
+}
+
+async function apiAddContract(data) {
+  const localId = addContract(data); // ローカル即時反映
+  if (USE_REAL_API) {
+    const result = await fetchFromGAS('addContract', { data: JSON.stringify(data) });
+    if (!result) showToast('契約のサーバー保存に失敗しました', 'warning');
+  }
+  return localId;
+}
+
+async function apiSaveClosingResult(data) {
+  const localId = saveClosingResult(data); // ローカル即時反映
+  if (USE_REAL_API) {
+    const result = await fetchFromGAS('saveClosingResult', { data: JSON.stringify(data) });
+    if (!result) showToast('商談記録のサーバー保存に失敗しました', 'warning');
+  }
+  return localId;
+}
+
+/**
+ * LINE メッセージ送信。GAS経由でLINE APIを呼ぶ。
+ */
+async function apiSendLine(lineUserId, messages) {
+  if (!USE_REAL_API) {
+    // デモ: 1.2秒後に成功を返す
+    await new Promise(r => setTimeout(r, 1200));
+    return { ok: true };
+  }
+  return fetchFromGAS('sendLine', {
+    userId: lineUserId,
+    messages: JSON.stringify(messages),
+  });
+}
+
+
+// ============================================================
+// app.js
+// ============================================================
+// ============================================================
+// ESTHE CRM - Main Application
+// ============================================================
+
+let currentView = 'customers';
+let selectedCustomerId = null;
+let currentTab = 'line-send';
+let selectedClosingResult = null;
+
+// ============================================================
+// INITIALIZE
+// ============================================================
+document.addEventListener('DOMContentLoaded', async () => {
+  initNav();
+  renderLoadingState();
+  await loadCustomersFromAPI();
+  await loadContractsFromAPI();
+  renderView('customers');
+  startAutoRefresh();
+});
+
+function initNav() {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      renderView(item.dataset.view);
+    });
+  });
+}
+
+// ============================================================
+// ローディング・自動更新
+// ============================================================
+function renderLoadingState() {
+  const container = document.getElementById('app-container');
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:16px;">
+      <div class="spinner" style="width:40px;height:40px;border-width:4px;"></div>
+      <div class="text-muted">${USE_REAL_API ? 'スプレッドシートからデータを読み込み中...' : '初期化中...'}</div>
+    </div>
+  `;
+}
+
+async function manualRefresh() {
+  const btn = document.getElementById('refresh-btn');
+  if (btn) {
+    btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px;display:inline-block;vertical-align:middle;"></span>';
+    btn.disabled = true;
+  }
+  await loadCustomersFromAPI();
+  await loadContractsFromAPI();
+  if (currentView === 'customers') renderView('customers');
+  else if (currentView === 'contracts') renderView('contracts');
+  showToast(USE_REAL_API ? 'スプレッドシートからデータを更新しました' : 'データを更新しました', 'success');
+  if (btn) { btn.innerHTML = '🔄 更新'; btn.disabled = false; }
+}
+
+let _autoRefreshTimer = null;
+function startAutoRefresh() {
+  if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+  if (!USE_REAL_API) return; // サンプルモードではポーリングしない
+  _autoRefreshTimer = setInterval(async () => {
+    await loadCustomersFromAPI();
+    // customers ビュー表示中のみ顧客リストを静音更新
+    if (currentView === 'customers') {
+      const listEl = document.getElementById('customer-list');
+      if (listEl) {
+        const q = (document.getElementById('customer-search') || {}).value || '';
+        const activeFilter = document.querySelector('.filter-btn.active');
+        const statusFilter = activeFilter ? activeFilter.dataset.status : 'all';
+        filterCustomerList(q.toLowerCase(), statusFilter);
+      }
+    }
+  }, POLL_INTERVAL_MS);
+}
+
+function renderView(view) {
+  currentView = view;
+  const container = document.getElementById('app-container');
+  switch (view) {
+    case 'customers':     container.innerHTML = renderCustomersView();     break;
+    case 'counseling':    container.innerHTML = renderCounselingView();    break;
+    case 'analysis':      container.innerHTML = renderAnalysisView();      break;
+    case 'closing':       container.innerHTML = renderClosingView();       break;
+    case 'contracts':     container.innerHTML = renderContractsView();     break;
+    case 'followup':      container.innerHTML = renderFollowupView();      break;
+    case 'retrospective': container.innerHTML = renderRetrospectiveView(); break;
+    case 'optimization':  container.innerHTML = renderOptimizationView();  break;
+  }
+  bindViewEvents(view);
+}
+
+// ============================================================
+// HELPER: STATUS BADGE
+// ============================================================
+function statusBadge(status) {
+  return `<span class="status-badge status-${status}">${status}</span>`;
+}
+
+function formatPrice(price) {
+  return '¥' + Number(price).toLocaleString();
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function customerInitial(name) {
+  return name ? name.charAt(0) : '?';
+}
+
+function buildCustomerOptions(selectedId) {
+  return CUSTOMERS.map(c =>
+    `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.name}（${c.furigana}）</option>`
+  ).join('');
+}
+
+// ============================================================
+// VIEW 1: CUSTOMERS
+// ============================================================
+function renderCustomersView() {
+  const customers = getCustomers();
+  const lastFetchStr = apiDataCache.lastFetch
+    ? apiDataCache.lastFetch.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+    : null;
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 1</span>
+        <h1>顧客一覧</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="text-muted">登録顧客数: ${customers.length}名</div>
+        ${lastFetchStr ? `<span class="text-muted" style="font-size:11px;">最終更新: ${lastFetchStr}</span>` : ''}
+        <button class="btn btn-ghost btn-sm" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
+      </div>
+    </div>
+    ${!USE_REAL_API ? `
+    <div style="background:#fff8e8;border:1px solid #e9950f;border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#7a5000;display:flex;align-items:center;gap:8px;">
+      📋 <strong>サンプルデータ表示中</strong> — スプレッドシートと接続するには <code style="background:#ffecc0;padding:1px 5px;border-radius:3px;">js/config.js</code> の <code style="background:#ffecc0;padding:1px 5px;border-radius:3px;">GAS_API_URL</code> にデプロイ済みのGAS Web App URLを設定してください
+    </div>` : ''}
+    <div class="customers-layout">
+      <div class="customer-list-panel">
+        <div class="customer-list-header">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="customer-search" placeholder="名前・フリガナ・電話番号で検索..." />
+          </div>
+          <div class="status-filters" id="status-filters">
+            <button class="filter-btn active" data-status="all">全て</button>
+            <button class="filter-btn" data-status="新規">新規</button>
+            <button class="filter-btn" data-status="来店">来店</button>
+            <button class="filter-btn" data-status="契約">契約</button>
+            <button class="filter-btn" data-status="フォロー中">フォロー中</button>
+          </div>
+        </div>
+        <div class="customer-list-body" id="customer-list">
+          ${renderCustomerList(customers, null)}
+        </div>
+      </div>
+      <div class="customer-detail-panel" id="customer-detail-panel">
+        ${renderEmptyDetail()}
+      </div>
+    </div>
+  `;
+}
+
+function renderCustomerList(customers, selectedId) {
+  if (customers.length === 0) {
+    return `<div class="empty-state" style="padding:40px 20px">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-text">該当する顧客が見つかりません</div>
+    </div>`;
+  }
+  return customers.map(c => `
+    <div class="customer-card-item ${c.id === selectedId ? 'selected' : ''}"
+         data-customer-id="${c.id}" onclick="selectCustomer('${c.id}')">
+      <div class="customer-card-top">
+        <div>
+          <div class="customer-furigana">${c.furigana}</div>
+          <div class="customer-name-main">${c.name}</div>
+        </div>
+        ${statusBadge(c.status)}
+      </div>
+      <div class="customer-card-meta">
+        <span>📞 ${c.phone}</span>
+        <span>🗓 ${formatDate(c.lastVisit)}</span>
+        <span>💆 ${c.treatmentCount}回</span>
+      </div>
+      <div class="concern-tags">
+        ${c.concerns.map(t => `<span class="concern-tag">${t}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderEmptyDetail() {
+  return `
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <div class="empty-text">顧客を選択してください</div>
+      <div class="empty-sub">左のリストから顧客を選択すると詳細が表示されます</div>
+    </div>
+  `;
+}
+
+function renderCustomerDetail(customerId) {
+  const c = getCustomerById(customerId);
+  if (!c) return renderEmptyDetail();
+  const treatments = getTreatmentsByCustomerId(customerId);
+
+  return `
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div>
+          <div class="detail-furigana">${c.furigana}</div>
+          <div class="detail-name">${c.name}</div>
+          <div class="detail-header-meta">
+            登録日: ${formatDate(c.registeredDate)} &nbsp;|&nbsp; 担当: ${c.staff}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <select class="status-select-inline" id="status-select" onchange="handleStatusChange('${c.id}', this.value)">
+            <option value="新規" ${c.status==='新規'?'selected':''}>🔵 新規</option>
+            <option value="来店" ${c.status==='来店'?'selected':''}>🟢 来店</option>
+            <option value="契約" ${c.status==='契約'?'selected':''}>🟡 契約</option>
+            <option value="フォロー中" ${c.status==='フォロー中'?'selected':''}>🟣 フォロー中</option>
+            <option value="失客" ${c.status==='失客'?'selected':''}>🔴 失客</option>
+          </select>
+          <span class="text-muted">最終来店: ${formatDate(c.lastVisit)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <label>電話番号</label>
+        <span>📞 ${c.phone}</span>
+      </div>
+      <div class="info-item">
+        <label>メールアドレス</label>
+        <span>✉ ${c.email}</span>
+      </div>
+      <div class="info-item">
+        <label>年齢・肌タイプ</label>
+        <span>${c.age}歳 / ${c.skinType}</span>
+      </div>
+      <div class="info-item">
+        <label>施術回数</label>
+        <span>💆 ${c.treatmentCount}回</span>
+      </div>
+      <div class="info-item" style="grid-column:1/-1">
+        <label>LINE User ID</label>
+        <input type="text" class="line-id-input" id="line-id-input" value="${c.lineUserId}" placeholder="LINEユーザーIDを入力..." />
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">お悩み</div>
+      <div class="concern-tags">
+        ${c.concerns.map(t => `<span class="concern-tag">${t}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">スタッフメモ</div>
+      <textarea class="memo-area" id="customer-memo" rows="3">${c.memo}</textarea>
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="saveMemo('${c.id}')">💾 保存</button>
+        <button class="btn btn-ghost btn-sm" onclick="saveLineId('${c.id}')">🔗 LINE ID保存</button>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">クイックアクション</div>
+      <div class="quick-actions">
+        <button class="btn btn-secondary btn-sm" onclick="goToViewWithCustomer('counseling','${c.id}')">📋 カウンセリング入力</button>
+        <button class="btn btn-secondary btn-sm" onclick="goToViewWithCustomer('analysis','${c.id}')">🔍 AI分析</button>
+        <button class="btn btn-line btn-sm" onclick="goToViewWithCustomer('followup','${c.id}')">💬 LINE送信</button>
+        <button class="btn btn-secondary btn-sm" onclick="goToViewWithCustomer('closing','${c.id}')">💡 クロージング</button>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">施術履歴（${treatments.length}件）</div>
+      ${treatments.length === 0 ? '<p class="text-muted text-sm">施術記録がありません</p>' : `
+      <table class="treatment-table">
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>施術内容</th>
+            <th>担当</th>
+            <th>金額</th>
+            <th>LINE</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${treatments.map(t => `
+            <tr>
+              <td>${formatDate(t.date)}</td>
+              <td>${t.content}</td>
+              <td>${t.staff}</td>
+              <td>${formatPrice(t.price)}</td>
+              <td><span class="line-sent-badge ${t.lineSent ? 'line-sent-yes' : 'line-sent-no'}">${t.lineSent ? '送信済' : '未送信'}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      `}
+    </div>
+  `;
+}
+
+function selectCustomer(customerId) {
+  selectedCustomerId = customerId;
+  // Update list highlight
+  document.querySelectorAll('.customer-card-item').forEach(el => {
+    el.classList.toggle('selected', el.dataset.customerId === customerId);
+  });
+  // Render detail
+  const panel = document.getElementById('customer-detail-panel');
+  if (panel) panel.innerHTML = renderCustomerDetail(customerId);
+}
+
+async function handleStatusChange(customerId, status) {
+  await apiUpdateStatus(customerId, status);
+  showToast(`ステータスを「${status}」に変更しました`, 'success');
+  // Re-render list
+  const listEl = document.getElementById('customer-list');
+  if (listEl) listEl.innerHTML = renderCustomerList(getCustomers(), customerId);
+}
+
+async function saveMemo(customerId) {
+  const memo = document.getElementById('customer-memo').value;
+  await apiUpdateMemo(customerId, memo);
+  showToast('メモを保存しました', 'success');
+}
+
+async function saveLineId(customerId) {
+  const lineId = document.getElementById('line-id-input').value;
+  await apiUpdateLineId(customerId, lineId);
+  showToast('LINE User IDを保存しました', 'success');
+}
+
+function goToViewWithCustomer(view, customerId) {
+  selectedCustomerId = customerId;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.view === view);
+  });
+  renderView(view);
+}
+
+// ============================================================
+// VIEW 2: COUNSELING
+// ============================================================
+function renderCounselingView() {
+  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const counselings = getCounselingByCustomerId(cid);
+  const today = new Date().toISOString().split('T')[0];
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 2</span>
+        <h1>カウンセリング記録</h1>
+      </div>
+    </div>
+    <div class="counseling-layout">
+      <div class="customer-selector-bar">
+        <label>顧客選択:</label>
+        <select class="form-select" id="counseling-customer-select" style="max-width:360px;" onchange="changeCounselingCustomer(this.value)">
+          ${buildCustomerOptions(cid)}
+        </select>
+      </div>
+
+      <div class="counseling-card">
+        <div class="form-section">
+          <div class="form-section-title">📋 カウンセリング情報</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">カウンセリング日</label>
+              <input type="date" class="form-input" id="counsel-date" value="${today}" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">担当スタッフ</label>
+              <input type="text" class="form-input" id="counsel-staff" placeholder="例: 山本 さくら" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">スタッフメモ（詳細観察）</label>
+            <textarea class="form-textarea" id="counsel-memo" rows="4" placeholder="肌状態、顧客の反応、気になった点など詳しく記録してください"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">施術目標</label>
+            <textarea class="form-textarea" id="counsel-goals" rows="2" placeholder="例: 全体的な肌質改善・均一なトーン"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ライフスタイル</label>
+            <textarea class="form-textarea" id="counsel-lifestyle" rows="2" placeholder="日焼け止め使用状況、スキンケアルーティン、職業環境など"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">アレルギー・禁忌</label>
+              <input type="text" class="form-input" id="counsel-allergies" placeholder="例: なし / 花粉症あり" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">服薬情報</label>
+              <input type="text" class="form-input" id="counsel-medicines" placeholder="例: なし / 抗生剤服用中" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-check">
+              <input type="checkbox" id="counsel-followup" />
+              <span>フォローアップ必要</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="form-section">
+          <div class="form-section-title">💆 新規施術記録</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">施術内容</label>
+              <input type="text" class="form-input" id="treat-content" placeholder="例: ハーブピーリング + 美白導入" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">金額（円）</label>
+              <input type="number" class="form-input" id="treat-price" placeholder="例: 15000" min="0" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">ビフォー画像URL</label>
+              <input type="url" class="form-input" id="treat-before" placeholder="https://..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">アフター画像URL</label>
+              <input type="url" class="form-input" id="treat-after" placeholder="https://..." />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">施術メモ</label>
+            <textarea class="form-textarea" id="treat-memo" rows="2" placeholder="施術の特記事項など"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="counsel-save-btn" onclick="submitCounseling()">
+          💾 カウンセリング・施術記録を保存する
+        </button>
+      </div>
+
+      <div class="past-records-card">
+        <div class="card-header">
+          <div class="card-title">📂 過去のカウンセリング記録（${counselings.length}件）</div>
+        </div>
+        <div class="card-body">
+          ${counselings.length === 0 ? '<p class="text-muted text-sm">記録がありません</p>' :
+            counselings.map(cs => `
+              <div class="counseling-history-item">
+                <div class="counseling-history-meta">
+                  <strong>${formatDate(cs.date)}</strong>
+                  <span>フォローアップ: <strong>${cs.followUpNeeded ? '必要' : '不要'}</strong></span>
+                </div>
+                <div class="counseling-history-content">
+                  <p><strong>メモ:</strong> ${cs.staffMemo}</p>
+                  ${cs.goals ? `<p style="margin-top:6px"><strong>目標:</strong> ${cs.goals}</p>` : ''}
+                  ${cs.lifestyle ? `<p style="margin-top:6px"><strong>ライフスタイル:</strong> ${cs.lifestyle}</p>` : ''}
+                  ${cs.allergies ? `<p style="margin-top:6px"><strong>アレルギー:</strong> ${cs.allergies}</p>` : ''}
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function changeCounselingCustomer(cid) {
+  selectedCustomerId = cid;
+  renderView('counseling');
+}
+
+function submitCounseling() {
+  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const date = document.getElementById('counsel-date').value;
+  const staff = document.getElementById('counsel-staff').value;
+  const memo = document.getElementById('counsel-memo').value;
+
+  if (!date || !staff || !memo) {
+    showToast('カウンセリング日・担当スタッフ・メモは必須です', 'error');
+    return;
+  }
+
+  saveCounseling({
+    customerId: cid,
+    date,
+    staffMemo: memo,
+    goals: document.getElementById('counsel-goals').value,
+    lifestyle: document.getElementById('counsel-lifestyle').value,
+    allergies: document.getElementById('counsel-allergies').value,
+    medicines: document.getElementById('counsel-medicines').value,
+    followUpNeeded: document.getElementById('counsel-followup').checked,
+  });
+
+  const content = document.getElementById('treat-content').value;
+  const price = document.getElementById('treat-price').value;
+  if (content) {
+    addTreatment({
+      customerId: cid,
+      date,
+      content,
+      staff,
+      price: parseInt(price) || 0,
+      beforeImage: document.getElementById('treat-before').value,
+      afterImage: document.getElementById('treat-after').value,
+      memo: document.getElementById('treat-memo').value,
+    });
+  }
+
+  showToast('カウンセリング記録を保存しました ✓', 'success');
+  renderView('counseling');
+}
+
+// ============================================================
+// VIEW 3: ANALYSIS
+// ============================================================
+function renderAnalysisView() {
+  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const result = analyzeCustomer(cid);
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 3</span>
+        <h1>AI自動分析</h1>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="refreshAnalysis()">🔄 AI分析を更新</button>
+    </div>
+    <div class="analysis-layout">
+      <div class="customer-selector-bar">
+        <label>分析対象顧客:</label>
+        <select class="form-select" id="analysis-customer-select" style="max-width:360px;" onchange="changeAnalysisCustomer(this.value)">
+          ${buildCustomerOptions(cid)}
+        </select>
+      </div>
+      ${result ? renderAnalysisResult(result) : '<p class="text-muted">顧客データが見つかりません</p>'}
+    </div>
+  `;
+}
+
+function renderAnalysisResult(result) {
+  const { score, stateLabel, stateColor, needs, recommendations, closingTips, daysSinceVisit, contract, customer } = result;
+  const circumference = 2 * Math.PI * 48;
+  const dashOffset = circumference - (score / 100) * circumference;
+
+  return `
+    <div class="score-ring-container">
+      <div class="score-ring-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="${stateColor}" stroke-width="10"
+                  stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"
+                  stroke-linecap="round" style="transition:stroke-dashoffset 1s ease"/>
+        </svg>
+        <div class="score-number">
+          <span class="score-value">${score}</span>
+          <span class="score-unit">/ 100</span>
+        </div>
+      </div>
+      <div class="score-details">
+        <div class="score-state-label" style="color:${stateColor}">${stateLabel}</div>
+        <div class="score-description">${customer.name}様のAI分析スコアです</div>
+        <div class="score-meta">
+          <div class="score-meta-item">
+            <span class="dot" style="background:${daysSinceVisit > 60 ? '#e05555' : '#52b788'}"></span>
+            最終来店: ${daysSinceVisit}日前
+          </div>
+          <div class="score-meta-item">
+            <span class="dot" style="background:${contract ? '#52b788' : '#e9950f'}"></span>
+            契約: ${contract ? 'あり' : 'なし'}
+          </div>
+          <div class="score-meta-item">
+            <span class="dot" style="background:${customer.lineUserId ? '#52b788' : '#e9950f'}"></span>
+            LINE: ${customer.lineUserId ? '連携済' : '未連携'}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <div class="analysis-card-header">🔬 ニーズ分析</div>
+        <div class="analysis-card-body">
+          ${needs.map(n => `
+            <div class="needs-item">
+              <div>
+                <div class="needs-concern">${n.concern}</div>
+                <div class="needs-treatment">${n.treatment}</div>
+              </div>
+              <span class="priority-badge priority-${n.priority}">${n.priority === 'HIGH' ? '高' : n.priority === 'MEDIUM' ? '中' : '低'}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-card-header">💡 提案内容</div>
+        <div class="analysis-card-body">
+          ${recommendations.map(r => `
+            <div class="recommendation-card">
+              <div class="rec-name">${r.name}</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;">
+                <span class="rec-price">${formatPrice(r.price)}</span>
+                <span class="rec-sessions">${r.sessions}回コース</span>
+              </div>
+              <div class="rec-reason">${r.reason}</div>
+              <div class="rec-urgency">⚡ ${r.urgency}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-card" style="margin-bottom:16px;">
+      <div class="analysis-card-header">⚠️ リスク要因</div>
+      <div class="analysis-card-body">
+        <div class="risk-item">
+          <span class="risk-label">最終来店からの日数</span>
+          <span class="risk-value ${daysSinceVisit > 60 ? 'risk-danger' : daysSinceVisit > 30 ? 'risk-warn' : 'risk-ok'}">${daysSinceVisit}日</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-label">契約状況</span>
+          <span class="risk-value ${contract ? 'risk-ok' : 'risk-warn'}">${contract ? '契約中（' + contract.content + '）' : '未契約'}</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-label">LINE ID連携</span>
+          <span class="risk-value ${customer.lineUserId ? 'risk-ok' : 'risk-danger'}">${customer.lineUserId ? '連携済み' : '未設定（フォロー困難）'}</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-label">施術回数</span>
+          <span class="risk-value ${customer.treatmentCount >= 5 ? 'risk-ok' : 'risk-warn'}">${customer.treatmentCount}回</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-label">お悩みへの対応状況</span>
+          <span class="risk-value risk-ok">${needs.filter(n => n.priority === 'HIGH').length}件の優先対応項目あり</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-footer-note">
+      ※ AIによる自動分析（ルールベース） — Claude API と連携することで分析精度が大幅に向上します。
+    </div>
+  `;
+}
+
+function changeAnalysisCustomer(cid) {
+  selectedCustomerId = cid;
+  renderView('analysis');
+}
+
+function refreshAnalysis() {
+  showToast('AI分析を更新しました ✓', 'success');
+  renderView('analysis');
+}
+
+// ============================================================
+// VIEW 4: CLOSING
+// ============================================================
+function renderClosingView() {
+  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const result = analyzeCustomer(cid);
+  const closingResults = getClosingResults().filter(r => r.customerId === cid);
+  const rec = result ? result.recommendations : [];
+  const scriptText = rec.map(r => `【${r.name}】\n${r.reason}\n料金: ${formatPrice(r.price)}（${r.sessions}回コース）\n${r.urgency}`).join('\n\n');
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 4</span>
+        <h1>AIクロージング支援</h1>
+      </div>
+    </div>
+    <div class="closing-layout">
+      <div class="customer-selector-bar">
+        <label>対象顧客:</label>
+        <select class="form-select" id="closing-customer-select" style="max-width:360px;" onchange="changeClosingCustomer(this.value)">
+          ${buildCustomerOptions(cid)}
+        </select>
+      </div>
+
+      ${result ? `
+      <div class="closing-score-container">
+        <div>
+          <div class="closing-score-label">クロージングスコア</div>
+          <div>
+            <span class="closing-score-value" style="color:${result.stateColor}">${result.score}</span>
+            <span class="closing-score-suffix">/100</span>
+          </div>
+          <div style="font-size:13px;opacity:0.8;margin-top:6px;">${result.stateLabel}</div>
+        </div>
+        <div class="closing-score-details">
+          <div style="font-size:13px;opacity:0.7;margin-bottom:4px;">${getCustomerById(cid).name}様のクロージング確率</div>
+          <div class="closing-score-bar-wrap">
+            <div class="closing-score-bar" style="width:${result.score}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.6;margin-top:4px;">
+            <span>0</span><span>50</span><span>100</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;">🎯 クロージングシナリオ</h3>
+        ${result.closingTips.map((tip, i) => `
+          <div class="scenario-card">
+            <div class="scenario-tip">シナリオ ${i + 1}: ${tip.tip}</div>
+            <div class="scenario-script" style="position:relative;">
+              ${tip.script}
+              <button class="copy-btn" onclick="copyScript(this, '${escapeQuote(tip.script)}')">コピー</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="counseling-card">
+        <div class="form-section-title">📝 提案スクリプト</div>
+        <textarea class="form-textarea" id="closing-script" rows="6">${scriptText}</textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="copyScript(null, document.getElementById('closing-script').value)">📋 スクリプトをコピー</button>
+        </div>
+      </div>
+
+      <div class="closing-result-form">
+        <div class="form-section-title" style="margin-bottom:14px;">📊 商談結果を記録</div>
+        <div class="result-options" id="result-options">
+          <button class="result-option" data-result="成功" onclick="selectResult('成功', this)">✅ 成功（契約）</button>
+          <button class="result-option" data-result="失敗" onclick="selectResult('失敗', this)">❌ 失敗（未成約）</button>
+          <button class="result-option" data-result="保留" onclick="selectResult('保留', this)">⏸ 保留（検討中）</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">商談メモ</label>
+          <textarea class="form-textarea" id="closing-memo" rows="3" placeholder="顧客の反応、断り理由、次回アプローチ方針など"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveClosingRecord('${cid}')">💾 商談結果を保存</button>
+      </div>
+
+      <div class="past-records-card">
+        <div class="card-header">
+          <div class="card-title">📂 過去の商談記録（${closingResults.length}件）</div>
+        </div>
+        <div class="card-body">
+          ${closingResults.length === 0 ? '<p class="text-muted text-sm">記録がありません</p>' : `
+          <table class="data-table">
+            <thead>
+              <tr><th>日付</th><th>結果</th><th>メモ</th></tr>
+            </thead>
+            <tbody>
+              ${closingResults.map(r => `
+                <tr>
+                  <td>${formatDate(r.date)}</td>
+                  <td><span class="status-badge ${r.result === '成功' ? 'status-契約' : r.result === '保留' ? 'status-フォロー中' : 'status-失客'}">${r.result}</span></td>
+                  <td>${r.memo || '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          `}
+        </div>
+      </div>
+      ` : '<p class="text-muted">顧客データが見つかりません</p>'}
+    </div>
+  `;
+}
+
+function escapeQuote(str) {
+  return str.replace(/'/g, "\\'").replace(/\n/g, ' ');
+}
+
+function changeClosingCustomer(cid) {
+  selectedCustomerId = cid;
+  selectedClosingResult = null;
+  renderView('closing');
+}
+
+function selectResult(result, el) {
+  selectedClosingResult = result;
+  document.querySelectorAll('.result-option').forEach(btn => {
+    btn.className = 'result-option';
+  });
+  if (result === '成功') el.classList.add('selected-success');
+  else if (result === '失敗') el.classList.add('selected-failure');
+  else el.classList.add('selected-pending');
+}
+
+async function saveClosingRecord(cid) {
+  if (!selectedClosingResult) {
+    showToast('商談結果を選択してください', 'error');
+    return;
+  }
+  const memo = document.getElementById('closing-memo').value;
+  await apiSaveClosingResult({
+    customerId: cid,
+    date: new Date().toISOString().split('T')[0],
+    result: selectedClosingResult,
+    memo,
+  });
+  showToast('商談結果を記録しました ✓', 'success');
+  selectedClosingResult = null;
+  renderView('closing');
+}
+
+function copyScript(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('スクリプトをコピーしました', 'success');
+    if (btn) { btn.textContent = '完了！'; setTimeout(() => { btn.textContent = 'コピー'; }, 2000); }
+  }).catch(() => showToast('コピーに失敗しました', 'error'));
+}
+
+// ============================================================
+// VIEW 5: CONTRACTS
+// ============================================================
+function renderContractsView() {
+  const contracts = getContracts();
+  const activeContracts = contracts.filter(c => c.status === 'active');
+  const totalRemaining = activeContracts.reduce((sum, c) => sum + (c.totalSessions - c.usedSessions), 0);
+
+  // Check expiring within 30 days
+  const now = new Date('2024-03-28');
+  const expiring = activeContracts.filter(c => {
+    const end = new Date(c.endDate);
+    const diff = (end - now) / (1000 * 60 * 60 * 24);
+    return diff <= 30 && diff >= 0;
+  });
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 5</span>
+        <h1>契約管理</h1>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openContractModal()">＋ 新規契約</button>
+    </div>
+
+    ${expiring.length > 0 ? `
+    <div class="alert-banner">
+      ⚠️ <strong>期限30日以内の契約が ${expiring.length}件</strong> あります: ${expiring.map(c => c.customerName).join('、')}
+    </div>
+    ` : ''}
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-icon summary-icon-primary">📄</div>
+        <div>
+          <div class="summary-value">${activeContracts.length}</div>
+          <div class="summary-label">アクティブ契約数</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon summary-icon-warning">⏰</div>
+        <div>
+          <div class="summary-value">${expiring.length}</div>
+          <div class="summary-label">今月期限切れ予定</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon summary-icon-info">🎟</div>
+        <div>
+          <div class="summary-value">${totalRemaining}</div>
+          <div class="summary-label">残回数合計</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contracts-table-wrap">
+      <div class="card-header" style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;">
+        契約一覧
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>契約ID</th>
+            <th>顧客名</th>
+            <th>コース名</th>
+            <th>タイプ</th>
+            <th>進捗</th>
+            <th>期限</th>
+            <th>金額</th>
+            <th>状態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${contracts.length === 0 ? '<tr class="no-data-row"><td colspan="9">契約データがありません</td></tr>' :
+            contracts.map(c => {
+              const pct = Math.round((c.usedSessions / c.totalSessions) * 100);
+              return `
+                <tr>
+                  <td class="text-muted text-xs">${c.id}</td>
+                  <td><strong>${c.customerName}</strong></td>
+                  <td>${c.content}</td>
+                  <td><span class="status-badge ${c.type === '回数券' ? 'status-来店' : 'status-契約'}">${c.type}</span></td>
+                  <td>
+                    <div class="progress-bar-wrap">
+                      <div class="progress-bar" style="width:${pct}%"></div>
+                    </div>
+                    <div class="progress-label">${c.usedSessions} / ${c.totalSessions}回使用 (${pct}%)</div>
+                  </td>
+                  <td>${formatDate(c.endDate)}</td>
+                  <td class="price-text">${Number(c.totalPrice).toLocaleString()}</td>
+                  <td><span class="contract-status-badge status-${c.status}">${c.status === 'active' ? '有効' : c.status === 'expired' ? '期限切れ' : '完了'}</span></td>
+                  <td>
+                    <button class="btn btn-ghost btn-sm" onclick="showContractDetail('${c.id}')">詳細</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openContractModal() {
+  const content = `
+    <div class="form-group">
+      <label class="form-label required">顧客</label>
+      <select class="form-select" id="new-contract-customer">
+        ${CUSTOMERS.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label required">コース名</label>
+      <input type="text" class="form-input" id="new-contract-content" placeholder="例: プレミアムホワイトニングコース" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label required">タイプ</label>
+        <select class="form-select" id="new-contract-type">
+          <option value="回数券">回数券</option>
+          <option value="役務">役務</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label required">総回数</label>
+        <input type="number" class="form-input" id="new-contract-sessions" placeholder="例: 10" min="1" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label required">金額（円）</label>
+        <input type="number" class="form-input" id="new-contract-price" placeholder="例: 150000" min="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">担当スタッフ</label>
+        <input type="text" class="form-input" id="new-contract-staff" placeholder="例: 山本 さくら" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label required">開始日</label>
+        <input type="date" class="form-input" id="new-contract-start" value="${new Date().toISOString().split('T')[0]}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label required">終了日</label>
+        <input type="date" class="form-input" id="new-contract-end" />
+      </div>
+    </div>
+  `;
+  showModal('新規契約を登録', content, [
+    { label: 'キャンセル', cls: 'btn-secondary', action: 'closeModal()' },
+    { label: '契約を登録', cls: 'btn-primary', action: 'submitNewContract()' },
+  ]);
+}
+
+async function submitNewContract() {
+  const customerId = document.getElementById('new-contract-customer').value;
+  const content = document.getElementById('new-contract-content').value;
+  const type = document.getElementById('new-contract-type').value;
+  const sessions = parseInt(document.getElementById('new-contract-sessions').value) || 0;
+  const price = parseInt(document.getElementById('new-contract-price').value) || 0;
+  const start = document.getElementById('new-contract-start').value;
+  const end = document.getElementById('new-contract-end').value;
+  const staff = document.getElementById('new-contract-staff').value;
+
+  if (!content || sessions <= 0 || price <= 0 || !start || !end) {
+    showToast('必須項目を入力してください', 'error');
+    return;
+  }
+
+  const customer = getCustomerById(customerId);
+  await apiAddContract({
+    customerId,
+    customerName: customer.name,
+    type,
+    content,
+    totalSessions: sessions,
+    usedSessions: 0,
+    startDate: start,
+    endDate: end,
+    totalPrice: price,
+    paidPrice: price,
+    staff: staff || '—',
+  });
+
+  closeModal();
+  showToast('契約を登録しました ✓', 'success');
+  renderView('contracts');
+}
+
+function showContractDetail(contractId) {
+  const c = getContracts().find(c => c.id === contractId);
+  if (!c) return;
+  const pct = Math.round((c.usedSessions / c.totalSessions) * 100);
+  const content = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><strong>契約ID</strong><br><span class="text-muted">${c.id}</span></div>
+      <div><strong>顧客名</strong><br>${c.customerName}</div>
+      <div><strong>コース名</strong><br>${c.content}</div>
+      <div><strong>タイプ</strong><br>${c.type}</div>
+      <div><strong>進捗</strong><br>${c.usedSessions} / ${c.totalSessions}回</div>
+      <div><strong>期間</strong><br>${formatDate(c.startDate)} 〜 ${formatDate(c.endDate)}</div>
+      <div><strong>金額</strong><br>${formatPrice(c.totalPrice)}</div>
+      <div><strong>担当</strong><br>${c.staff}</div>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="progress-bar-wrap" style="height:10px">
+        <div class="progress-bar" style="width:${pct}%"></div>
+      </div>
+      <div class="progress-label" style="margin-top:4px">${pct}% 使用済み</div>
+    </div>
+  `;
+  showModal('契約詳細', content, [
+    { label: '閉じる', cls: 'btn-secondary', action: 'closeModal()' },
+  ]);
+}
+
+// ============================================================
+// VIEW 6: FOLLOWUP
+// ============================================================
+function renderFollowupView() {
+  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const customer = getCustomerById(cid);
+  const lineHistory = getLineHistory();
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 6</span>
+        <h1>アフターフォロー &amp; LINE送信</h1>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="line-send" onclick="switchFollowupTab('line-send', this)">💬 LINE送信</button>
+      <button class="tab-btn" data-tab="auto-config" onclick="switchFollowupTab('auto-config', this)">⚙️ 自動配信設定</button>
+      <button class="tab-btn" data-tab="history" onclick="switchFollowupTab('history', this)">📂 送信履歴</button>
+    </div>
+
+    <div id="tab-line-send" class="tab-content active">
+      <div class="followup-card">
+        <div class="customer-selector-bar" style="border:none;box-shadow:none;padding:0;margin-bottom:16px;">
+          <label>送信先顧客:</label>
+          <select class="form-select" id="followup-customer-select" style="max-width:360px;" onchange="changeFollowupCustomer(this.value)">
+            ${buildCustomerOptions(cid)}
+          </select>
+        </div>
+
+        ${!customer.lineUserId ? `
+        <div class="line-warning">
+          ⚠️ この顧客にはLINE User IDが設定されていません。顧客詳細から設定してください。
+        </div>
+        ` : `
+        <div class="form-group">
+          <label class="form-label">LINE User ID</label>
+          <input type="text" class="form-input" id="line-user-id-input" value="${customer.lineUserId}" />
+        </div>
+        `}
+
+        <div class="form-group">
+          <label class="form-label">メッセージタイプ</label>
+          <div class="message-type-selector">
+            <button class="msg-type-btn active" data-type="thanks" onclick="selectMsgType('thanks', this)">🙏 お礼</button>
+            <button class="msg-type-btn" data-type="before-after" onclick="selectMsgType('before-after', this)">📸 ビフォーアフター</button>
+            <button class="msg-type-btn" data-type="followup" onclick="selectMsgType('followup', this)">💌 フォローアップ</button>
+            <button class="msg-type-btn" data-type="custom" onclick="selectMsgType('custom', this)">✏️ カスタム</button>
+          </div>
+        </div>
+
+        <div id="before-after-inputs" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">ビフォー画像URL</label>
+              <input type="url" class="form-input" id="before-image-url" placeholder="https://..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">アフター画像URL</label>
+              <input type="url" class="form-input" id="after-image-url" placeholder="https://..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">メッセージプレビュー</label>
+          <textarea class="form-textarea" id="line-message-preview" rows="6">${getLineMessageTemplate('thanks', customer.name)}</textarea>
+        </div>
+
+        <button class="btn btn-line" id="line-send-btn" onclick="sendLine('${cid}')" ${!customer.lineUserId ? 'disabled' : ''}>
+          💬 LINEで送信する
+        </button>
+      </div>
+    </div>
+
+    <div id="tab-auto-config" class="tab-content">
+      <div class="coming-soon">
+        <div class="coming-soon-icon">⚙️</div>
+        <div class="coming-soon-title">自動配信設定</div>
+        <p class="text-muted text-sm" style="margin-top:8px;">来店後の自動お礼メッセージや、リピート促進メッセージの自動配信機能は近日公開予定です。</p>
+      </div>
+    </div>
+
+    <div id="tab-history" class="tab-content">
+      <div class="contracts-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>送信日</th>
+              <th>顧客名</th>
+              <th>タイプ</th>
+              <th>メッセージ（抜粋）</th>
+              <th>状態</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lineHistory.length === 0 ? '<tr class="no-data-row"><td colspan="5">送信履歴がありません</td></tr>' :
+              lineHistory.map(h => `
+                <tr>
+                  <td>${formatDate(h.date)}</td>
+                  <td>${h.customerName}</td>
+                  <td><span class="status-badge status-来店">${h.type}</span></td>
+                  <td class="text-muted text-sm">${h.message.substring(0, 40)}...</td>
+                  <td><span class="line-sent-badge line-sent-yes">${h.status}</span></td>
+                </tr>
+              `).join('')
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function getLineMessageTemplate(type, name) {
+  const templates = {
+    thanks: `${name}様\n\n本日はご来店いただきありがとうございました✨\n施術はいかがでしたでしょうか？\n\nお肌の状態やご感想があればぜひお聞かせください😊\nまたのご来店を心よりお待ちしております。\n\n— エステサロン スタッフ一同`,
+    'before-after': `${name}様\n\n本日の施術のビフォーアフターをお届けします📸\n\n✨ ビフォー:\n[画像をご確認ください]\n\n✨ アフター:\n[画像をご確認ください]\n\n変化を実感していただけましたでしょうか？\n引き続きのケアで、さらなる効果が期待できます！`,
+    followup: `${name}様\n\n先日のご来店から少し経ちましたが、お肌の状態はいかがでしょうか？😊\n\n何かご不安な点やご質問がございましたら、いつでもお気軽にご連絡ください。\n\nまた近いうちにお会いできることを楽しみにしています✨`,
+    custom: `${name}様\n\n`,
+  };
+  return templates[type] || templates.thanks;
+}
+
+function switchFollowupTab(tabName, btn) {
+  currentTab = tabName;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const el = document.getElementById('tab-' + tabName);
+  if (el) el.classList.add('active');
+}
+
+function changeFollowupCustomer(cid) {
+  selectedCustomerId = cid;
+  renderView('followup');
+}
+
+function selectMsgType(type, btn) {
+  document.querySelectorAll('.msg-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cid = document.getElementById('followup-customer-select').value;
+  const customer = getCustomerById(cid);
+  const preview = document.getElementById('line-message-preview');
+  if (preview) preview.value = getLineMessageTemplate(type, customer ? customer.name : '');
+
+  const baInputs = document.getElementById('before-after-inputs');
+  if (baInputs) baInputs.style.display = type === 'before-after' ? 'block' : 'none';
+}
+
+async function sendLine(cid) {
+  const customer = getCustomerById(cid);
+  const lineUserId = (document.getElementById('line-user-id-input') || {}).value || customer.lineUserId;
+  const message = (document.getElementById('line-message-preview') || {}).value || '';
+  const beforeImage = (document.getElementById('before-image-url') || {}).value || '';
+  const afterImage = (document.getElementById('after-image-url') || {}).value || '';
+
+  await sendLineMessage(lineUserId, message, beforeImage, afterImage);
+
+  if (lineUserId) {
+    const msgType = document.querySelector('.msg-type-btn.active')?.dataset.type || 'カスタム';
+    const typeLabels = { thanks: 'お礼メッセージ', 'before-after': 'ビフォーアフター', followup: 'フォローアップ', custom: 'カスタム' };
+    addLineHistory({
+      customerId: cid,
+      customerName: customer.name,
+      date: new Date().toISOString().split('T')[0],
+      type: typeLabels[msgType] || 'カスタム',
+      message,
+    });
+  }
+}
+
+// ============================================================
+// LINE Message Sender — GAS経由でLINE Messaging APIを呼ぶ
+// ============================================================
+async function sendLineMessage(lineUserId, message, beforeImage, afterImage) {
+  if (!lineUserId) {
+    showToast('LINE User IDが設定されていません', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('line-send-btn');
+  if (btn) {
+    btn.innerHTML = '<span class="spinner"></span> 送信中...';
+    btn.classList.add('btn-loading');
+  }
+
+  // メッセージ配列を構築
+  const messages = [{ type: 'text', text: message }];
+  if (beforeImage) {
+    messages.push({ type: 'image', originalContentUrl: beforeImage, previewImageUrl: beforeImage });
+    messages.push({ type: 'text', text: '⬆️ ビフォー' });
+  }
+  if (afterImage) {
+    messages.push({ type: 'image', originalContentUrl: afterImage, previewImageUrl: afterImage });
+    messages.push({ type: 'text', text: '⬆️ アフター' });
+  }
+
+  const result = await apiSendLine(lineUserId, messages);
+
+  if (btn) {
+    btn.innerHTML = '💬 LINEで送信する';
+    btn.classList.remove('btn-loading');
+  }
+
+  if (result && result.ok) {
+    showToast('LINEメッセージを送信しました ✓', 'success');
+  } else {
+    const errMsg = result && result.error ? result.error : '送信に失敗しました';
+    showToast(errMsg, 'error');
+  }
+}
+
+// ============================================================
+// VIEW 7: RETROSPECTIVE
+// ============================================================
+function renderRetrospectiveView() {
+  const customers = getCustomers();
+  const treatments = TREATMENTS;
+  const contracts = getContracts();
+
+  const newCount = customers.filter(c => c.status === '新規').length;
+  const contractCount = customers.filter(c => c.status === '契約').length;
+  const contractRate = Math.round((contractCount / customers.length) * 100);
+  const totalRevenue = treatments.reduce((sum, t) => sum + (t.price || 0), 0);
+
+  // Staff contract rates
+  const staffData = [
+    { name: '山本 さくら', contracts: 1, visits: 3, rate: 33 },
+    { name: '田村 あかね', contracts: 1, visits: 2, rate: 50 },
+  ];
+
+  // Status distribution
+  const statusDist = [
+    { label: '契約', count: customers.filter(c => c.status === '契約').length, color: '#e9950f' },
+    { label: '来店', count: customers.filter(c => c.status === '来店').length, color: '#52b788' },
+    { label: 'フォロー中', count: customers.filter(c => c.status === 'フォロー中').length, color: '#8b6b8a' },
+    { label: '新規', count: customers.filter(c => c.status === '新規').length, color: '#5b9bd5' },
+    { label: '失客', count: customers.filter(c => c.status === '失客').length, color: '#e05555' },
+  ];
+
+  // Treatment ranking
+  const treatRanking = [
+    { name: 'HIFU（ハイフ）リフトアップ', count: 1 },
+    { name: 'ハーブピーリング + 美白導入', count: 1 },
+    { name: '超音波フェイシャル', count: 1 },
+    { name: 'アロマフェイシャル', count: 1 },
+    { name: 'イオン導入 保湿ケア', count: 1 },
+  ];
+
+  // Lost customers (フォロー中 + 60+ days no visit)
+  const lostCustomers = customers.filter(c => {
+    const days = Math.floor((new Date('2024-03-28') - new Date(c.lastVisit)) / (1000*60*60*24));
+    return c.status === 'フォロー中' || days > 60;
+  });
+
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 7</span>
+        <h1>振り返り分析</h1>
+      </div>
+    </div>
+
+    <div class="period-filter">
+      <button class="period-btn active" data-period="month">今月</button>
+      <button class="period-btn" data-period="lastmonth">先月</button>
+      <button class="period-btn" data-period="3months">3ヶ月</button>
+      <button class="period-btn" data-period="custom">カスタム</button>
+    </div>
+
+    <div class="kpi-cards">
+      <div class="kpi-card">
+        <div class="kpi-label">新規顧客数</div>
+        <div class="kpi-value">${newCount}<span class="kpi-unit">名</span></div>
+        <div class="kpi-change up">↑ 前月比 +2名</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">契約成立数</div>
+        <div class="kpi-value">${contractCount}<span class="kpi-unit">件</span></div>
+        <div class="kpi-change up">↑ 前月比 +1件</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">契約率</div>
+        <div class="kpi-value">${contractRate}<span class="kpi-unit">%</span></div>
+        <div class="kpi-change up">↑ 前月比 +5%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">売上合計</div>
+        <div class="kpi-value" style="font-size:20px;">¥${(totalRevenue/10000).toFixed(1)}<span class="kpi-unit">万</span></div>
+        <div class="kpi-change up">↑ 前月比 +15%</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">👩‍💼 スタッフ別契約率</div>
+        <div class="chart-body">
+          ${staffData.map(s => `
+            <div class="h-bar-item">
+              <div class="h-bar-label">
+                <span>${s.name}</span>
+                <span>${s.contracts}/${s.visits}件（${s.rate}%）</span>
+              </div>
+              <div class="h-bar-track">
+                <div class="h-bar-fill" style="width:${s.rate}%"></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">📊 ステータス別顧客分布</div>
+        <div class="chart-body">
+          <div class="donut-bars">
+            ${statusDist.map(s => `
+              <div class="dist-item">
+                <span class="dist-dot" style="background:${s.color}"></span>
+                <span class="dist-label">${s.label}</span>
+                <div class="dist-bar-wrap">
+                  <div class="dist-bar" style="width:${(s.count/customers.length*100)}%;background:${s.color}"></div>
+                </div>
+                <span class="dist-count">${s.count}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">🏆 施術別人気ランキング</div>
+        <div class="chart-body">
+          ${treatRanking.map((t, i) => `
+            <div class="ranking-item">
+              <span class="rank-num ${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other'}">${i+1}</span>
+              <span class="rank-name">${t.name}</span>
+              <span class="rank-count">${t.count}件</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">📉 売上トレンド（簡易）</div>
+        <div class="chart-body">
+          ${[
+            { month: '1月', amount: 27000 },
+            { month: '2月', amount: 37000 },
+            { month: '3月', amount: totalRevenue },
+          ].map(m => `
+            <div class="h-bar-item">
+              <div class="h-bar-label">
+                <span>${m.month}</span>
+                <span>${formatPrice(m.amount)}</span>
+              </div>
+              <div class="h-bar-track">
+                <div class="h-bar-fill" style="width:${Math.round(m.amount/1200)}%"></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="lost-customers-card">
+      <div class="card-header">
+        <div class="card-title">⚠️ 要フォロー顧客（来店60日以上 / フォロー中）</div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>顧客名</th><th>ステータス</th><th>最終来店</th><th>経過日数</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+          ${lostCustomers.length === 0 ? '<tr class="no-data-row"><td colspan="5">該当顧客なし</td></tr>' :
+            lostCustomers.map(c => {
+              const days = Math.floor((new Date('2024-03-28') - new Date(c.lastVisit)) / (1000*60*60*24));
+              return `
+                <tr>
+                  <td><strong>${c.name}</strong></td>
+                  <td>${statusBadge(c.status)}</td>
+                  <td>${formatDate(c.lastVisit)}</td>
+                  <td><span style="color:${days > 60 ? 'var(--danger)' : 'var(--warning)'};font-weight:700;">${days}日</span></td>
+                  <td>
+                    <button class="btn btn-line btn-sm" onclick="goToViewWithCustomer('followup','${c.id}')">LINE送信</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="improvement-list" style="margin-top:16px;">
+      <div class="card-header"><div class="card-title">💡 改善提案</div></div>
+      <div class="improvement-item">
+        <div class="improvement-icon">📱</div>
+        <div class="improvement-text">
+          <strong>LINE登録率が低い:</strong> 新規顧客のLINE ID未登録が1件あります。来店時にQRコードを提示してLINE友達登録を促しましょう。
+        </div>
+      </div>
+      <div class="improvement-item">
+        <div class="improvement-icon">📅</div>
+        <div class="improvement-text">
+          <strong>来店間隔が空いている顧客が${lostCustomers.length}名:</strong> 定期的なフォローアップLINEを送ることで再来店率が向上します。
+        </div>
+      </div>
+      <div class="improvement-item">
+        <div class="improvement-icon">📄</div>
+        <div class="improvement-text">
+          <strong>契約なし顧客へのアプローチ:</strong> 来店3回以上の未契約顧客（鈴木様、伊藤様）にコース提案のタイミングです。
+        </div>
+      </div>
+      <div class="improvement-item">
+        <div class="improvement-icon">💰</div>
+        <div class="improvement-text">
+          <strong>単価向上の余地あり:</strong> 平均施術単価${formatPrice(Math.round(totalRevenue / treatments.length))}は改善可能です。オプション追加や高単価メニューの提案を強化しましょう。
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// VIEW 8: OPTIMIZATION
+// ============================================================
+function renderOptimizationView() {
+  return `
+    <div class="view-header">
+      <div class="view-title">
+        <span class="step-badge">STEP 8</span>
+        <h1>AI学習・最適化</h1>
+      </div>
+    </div>
+
+    <div class="optimization-grid">
+      <div class="pattern-card">
+        <div class="pattern-header pattern-header-success">✅ 成功パターン</div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-success"></span>
+          <span>契約した顧客の共通点: <strong>来店3回以内に提案</strong>、たるみ・シミ悩みを保有</span>
+        </div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-success"></span>
+          <span>LINE連携済みの顧客は<strong>再来店率が2倍</strong>高い</span>
+        </div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-success"></span>
+          <span>施術後24時間以内のお礼LINEで<strong>顧客満足度が向上</strong></span>
+        </div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-success"></span>
+          <span>ビフォーアフター共有をした顧客の<strong>継続率が85%</strong></span>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <div class="pattern-header pattern-header-fail">❌ 失敗パターン</div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-fail"></span>
+          <span>初回来店から<strong>3ヶ月以上放置</strong>すると再来店率が急減</span>
+        </div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-fail"></span>
+          <span>施術内容の説明が不十分だった場合に<strong>不安・クレームが発生</strong></span>
+        </div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-fail"></span>
+          <span>高額コースを<strong>1回目の来店で提案</strong>すると成約率が低下</span>
+        </div>
+        <div class="pattern-item">
+          <span class="pattern-bullet bullet-fail"></span>
+          <span>フォローLINEを送らないと<strong>顧客が忘れてしまう</strong>ケースが多発</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <div class="form-section-title" style="margin-bottom:14px;">🎯 今月の改善アクション</div>
+      <div class="action-item">
+        <div class="action-num">1</div>
+        <div class="action-text"><strong>山田 愛様のLINE登録促進:</strong> 次回来店時にQRコードを提示。登録特典（初回割引10%）を用意して登録率を上げる。</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">2</div>
+        <div class="action-text"><strong>伊藤 ゆり様への再来店フォロー:</strong> 前回施術から28日経過。「お肌のその後は？」というフォローLINEで再来店を促す。</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">3</div>
+        <div class="action-text"><strong>鈴木 花子様へのコース提案:</strong> 来店3回達成。次回施術時にビフォーアフターを共有し、まとめ買いコースを提案するタイミング。</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">4</div>
+        <div class="action-text"><strong>田中 美咲様の契約更新準備:</strong> 現コースの残り2回。12月期限切れ前に次のコースを提案。ホワイトニング強化コースが効果的。</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">5</div>
+        <div class="action-text"><strong>ビフォーアフター撮影の徹底:</strong> 全施術でビフォーアフター画像を記録。来店後のLINE送付で効果を可視化し、継続モチベーションを高める。</div>
+      </div>
+    </div>
+
+    <div class="ai-advice-grid">
+      <div class="advice-card">
+        <div class="advice-icon">🧠</div>
+        <div class="advice-title">最適提案タイミング</div>
+        <div class="advice-text">来店2〜3回目の顧客は購買意欲が最も高まるタイミングです。このフェーズで具体的なコース提案を行うと成約率が向上します。</div>
+      </div>
+      <div class="advice-card">
+        <div class="advice-icon">💬</div>
+        <div class="advice-title">LINEフォロー最適化</div>
+        <div class="advice-text">施術後24時間以内のお礼メッセージ + 7日後のフォローアップの2段階アプローチで再来店率が平均32%向上しています。</div>
+      </div>
+      <div class="advice-card">
+        <div class="advice-icon">📊</div>
+        <div class="advice-title">データ活用のヒント</div>
+        <div class="advice-text">顧客の悩みタグとリピート率には強い相関があります。「たるみ」悩みを持つ顧客のコース契約率は他の悩みと比較して高い傾向があります。</div>
+      </div>
+    </div>
+
+    <div class="data-quality-card">
+      <div class="form-section-title" style="margin-bottom:14px;">📈 データ蓄積状況</div>
+      <div class="quality-item">
+        <div class="quality-label-row">
+          <span>顧客データ</span>
+          <span>5 / 50名（推奨）</span>
+        </div>
+        <div class="quality-bar-wrap">
+          <div class="quality-bar" style="width:10%"></div>
+        </div>
+      </div>
+      <div class="quality-item">
+        <div class="quality-label-row">
+          <span>施術記録</span>
+          <span>7 / 100件（推奨）</span>
+        </div>
+        <div class="quality-bar-wrap">
+          <div class="quality-bar" style="width:7%"></div>
+        </div>
+      </div>
+      <div class="quality-item">
+        <div class="quality-label-row">
+          <span>契約データ</span>
+          <span>2 / 20件（推奨）</span>
+        </div>
+        <div class="quality-bar-wrap">
+          <div class="quality-bar" style="width:10%"></div>
+        </div>
+      </div>
+      <div class="quality-item">
+        <div class="quality-label-row">
+          <span>カウンセリング記録</span>
+          <span>1 / 20件（推奨）</span>
+        </div>
+        <div class="quality-bar-wrap">
+          <div class="quality-bar" style="width:5%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="upgrade-banner">
+      <div>
+        <div class="upgrade-text">✨ Claude API と連携することで分析精度が大幅に向上します</div>
+        <div class="upgrade-sub">自然言語による顧客分析・提案スクリプト生成・感情分析が利用可能になります</div>
+      </div>
+      <button class="btn btn-primary" onclick="showToast('Claude API連携については管理者にお問い合わせください', 'info')">詳細を見る</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// BIND VIEW EVENTS
+// ============================================================
+function bindViewEvents(view) {
+  if (view === 'customers') {
+    const searchInput = document.getElementById('customer-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.toLowerCase();
+        const statusFilter = document.querySelector('.filter-btn.active')?.dataset.status || 'all';
+        filterCustomerList(q, statusFilter);
+      });
+    }
+
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const q = (document.getElementById('customer-search')?.value || '').toLowerCase();
+        filterCustomerList(q, btn.dataset.status);
+      });
+    });
+
+    if (selectedCustomerId) {
+      selectCustomer(selectedCustomerId);
+    }
+  }
+
+  if (view === 'retrospective') {
+    document.querySelectorAll('.period-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showToast(`${btn.textContent}のデータを表示しています`, 'info');
+      });
+    });
+  }
+}
+
+function filterCustomerList(query, statusFilter) {
+  let filtered = getCustomers();
+  if (statusFilter && statusFilter !== 'all') {
+    filtered = filtered.filter(c => c.status === statusFilter);
+  }
+  if (query) {
+    filtered = filtered.filter(c =>
+      c.name.toLowerCase().includes(query) ||
+      c.furigana.toLowerCase().includes(query) ||
+      c.phone.includes(query) ||
+      c.email.toLowerCase().includes(query)
+    );
+  }
+  const listEl = document.getElementById('customer-list');
+  if (listEl) listEl.innerHTML = renderCustomerList(filtered, selectedCustomerId);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(title, bodyHtml, buttons) {
+  const overlay = document.getElementById('modal-overlay');
+  const container = document.getElementById('modal-container');
+
+  const btnHtml = (buttons || []).map(b =>
+    `<button class="btn ${b.cls}" onclick="${b.action}">${b.label}</button>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${title}</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">${bodyHtml}</div>
+    <div class="modal-footer">${btnHtml}</div>
+  `;
+
+  overlay.classList.remove('hidden');
+  container.classList.remove('hidden');
+
+  overlay.onclick = closeModal;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+  document.getElementById('modal-container').classList.add('hidden');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer = null;
+
+function showToast(message, type) {
+  type = type || 'success';
+  const toast = document.getElementById('toast');
+  const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+  toast.innerHTML = `<span>${icons[type] || '✓'}</span> ${message}`;
+  toast.className = `toast ${type}`;
+  toast.classList.remove('hidden');
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 3000);
+}
+
+  </script>
+</body>
+</html>
