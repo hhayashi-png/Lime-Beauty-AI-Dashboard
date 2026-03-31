@@ -1100,8 +1100,8 @@ function filterCustomerList(query, statusFilter) {
 // VIEW 2: COUNSELING
 // ============================================================
 function renderCounselingView() {
-  const cid = selectedCustomerId || CUSTOMERS[0].id;
-  const counselings = getCounselingByCustomerId(cid);
+  const cid = selectedCustomerId || (CUSTOMERS.length > 0 ? CUSTOMERS[0].id : null);
+  const counselings = cid ? getCounselingByCustomerId(cid) : [];
   const today = new Date().toISOString().split('T')[0];
   return `
     <div class="view-header">
@@ -1292,7 +1292,8 @@ function renderFormResponsesTable(rows) {
 function changeCounselingCustomer(cid) { selectedCustomerId = cid; renderView('counseling'); }
 
 function submitCounseling() {
-  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const cid = selectedCustomerId || (CUSTOMERS.length > 0 ? CUSTOMERS[0].id : null);
+  if (!cid) { showToast('顧客が選択されていません', 'warning'); return; }
   const date = document.getElementById('counsel-date').value;
   const staff = document.getElementById('counsel-staff').value;
   const memo = document.getElementById('counsel-memo').value;
