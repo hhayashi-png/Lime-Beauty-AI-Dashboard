@@ -1318,7 +1318,7 @@ function submitCounseling() {
 // VIEW 3: ANALYSIS
 // ============================================================
 function renderAnalysisView() {
-  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const cid = selectedCustomerId || (CUSTOMERS.length > 0 ? CUSTOMERS[0].id : null);
   const result = analyzeCustomer(cid);
   return `
     <div class="view-header">
@@ -1404,7 +1404,7 @@ function refreshAnalysis() { showToast('AI分析を更新しました ✓', 'suc
 // VIEW 4: CLOSING
 // ============================================================
 function renderClosingView() {
-  const cid = selectedCustomerId || CUSTOMERS[0].id;
+  const cid = selectedCustomerId || (CUSTOMERS.length > 0 ? CUSTOMERS[0].id : null);
   const result = analyzeCustomer(cid);
   const closingResults = getClosingResults().filter(r => r.customerId === cid);
   const rec = result ? result.recommendations : [];
