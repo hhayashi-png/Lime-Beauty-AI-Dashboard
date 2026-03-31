@@ -550,7 +550,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Hira
 // ============================================================
 // CONFIG
 // ============================================================
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzXdOQo1NrYbCaPskVodgGAlZVsTG_yQEJXLw1e-7_rQPaJVTVnOFOixwkm6WTLYdlFzg/exec';
+const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwE9F3IMsPdsK73rFBMXc7JB5FmUJ0HggVlJ4NwrNeicuJVW-hco90SR7b0zG78fgOSfg/exec';
 const USE_REAL_API = GAS_API_URL !== 'YOUR_GAS_WEBAPP_URL_HERE';
 const FORM_SHEET_NAME = 'フォームの回答 1';
 const POLL_INTERVAL_MS = 30000;
@@ -1110,7 +1110,11 @@ function renderCounselingView() {
         <h1>カウンセリング記録</h1>
       </div>
     </div>
-    <div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="counsel-input" onclick="switchCounselingTab('counsel-input', this)">📋 記録入力</button>
+      <button class="tab-btn" data-tab="counsel-forms" onclick="switchCounselingTab('counsel-forms', this); loadFormResponses();">📊 フォーム回答一覧</button>
+    </div>
+    <div id="tab-counsel-input" class="tab-content active">
       <div class="customer-selector-bar">
         <label style="font-size:13px;color:var(--text-muted);white-space:nowrap;">顧客選択:</label>
         <select class="form-select" id="counseling-customer-select" style="max-width:360px;" onchange="changeCounselingCustomer(this.value)">
@@ -1205,7 +1209,84 @@ function renderCounselingView() {
         </div>
       </div>
     </div>
+    <div id="tab-counsel-forms" class="tab-content">
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:13px;color:var(--text-muted);white-space:nowrap;">店舗フィルター:</span>
+        <button class="btn btn-secondary btn-sm form-filter-btn active" data-shop="all" onclick="filterFormResponses('all', this)">全店舗</button>
+        <button class="btn btn-secondary btn-sm form-filter-btn" data-shop="ONDARI_NISHIFUNA" onclick="filterFormResponses('ONDARI_NISHIFUNA', this)">西船橋店 オンダリフト</button>
+        <button class="btn btn-secondary btn-sm form-filter-btn" data-shop="PEELING_NISHIFUNA" onclick="filterFormResponses('PEELING_NISHIFUNA', this)">西船橋店 ピーリング</button>
+      </div>
+      <div id="form-responses-container">
+        <div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">「フォーム回答一覧」タブをクリックしてデータを読み込んでください</div>
+      </div>
+    </div>
   `;
+}
+
+function switchCounselingTab(tabName, btn) {
+  document.querySelectorAll('#tab-counsel-input, #tab-counsel-forms').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.tabs .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  var el = document.getElementById('tab-' + tabName);
+  if (el) el.classList.add('active');
+  btn.classList.add('active');
+}
+
+var _formResponsesAll = [];
+
+async function loadFormResponses() {
+  var container = document.getElementById('form-responses-container');
+  if (!container) return;
+  container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">読み込み中...</div>';
+  var data = await fetchFromGAS('getCustomers');
+  if (!data || !Array.isArray(data)) {
+    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">データがありません</div>';
+    return;
+  }
+  _formResponsesAll = data.filter(function(c) { return c.source === 'フォーム回答'; });
+  renderFormResponsesTable(_formResponsesAll);
+}
+
+function filterFormResponses(shop, btn) {
+  document.querySelectorAll('.form-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var filtered = shop === 'all' ? _formResponsesAll : _formResponsesAll.filter(function(c) { return c.shop === shop; });
+  renderFormResponsesTable(filtered);
+}
+
+function renderFormResponsesTable(rows) {
+  var container = document.getElementById('form-responses-container');
+  if (!container) return;
+  if (!rows || rows.length === 0) {
+    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">データがありません</div>';
+    return;
+  }
+  var shopLabel = { 'ONDARI_NISHIFUNA': '西船橋店 オンダリフト', 'PEELING_NISHIFUNA': '西船橋店 ピーリング' };
+  var rows_html = rows.map(function(c) {
+    return '<tr style="border-bottom:1px solid var(--border);font-size:13px;">' +
+      '<td style="padding:10px 12px;white-space:nowrap;">' + (c.registeredDate || '') + '</td>' +
+      '<td style="padding:10px 12px;">' + (c.name || '') + '</td>' +
+      '<td style="padding:10px 12px;white-space:nowrap;">' + (c.phone || '') + '</td>' +
+      '<td style="padding:10px 12px;">' + (c.email || '') + '</td>' +
+      '<td style="padding:10px 12px;white-space:nowrap;">' + (c.age ? c.age + '歳' : '') + '</td>' +
+      '<td style="padding:10px 12px;">' + (c.skinType || '') + '</td>' +
+      '<td style="padding:10px 12px;white-space:nowrap;">' + (shopLabel[c.shop] || c.shop || '') + '</td>' +
+    '</tr>';
+  }).join('');
+  container.innerHTML =
+    '<div style="overflow-x:auto;">' +
+    '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">' + rows.length + '件</div>' +
+    '<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm);">' +
+      '<thead><tr style="background:var(--surface-2);font-size:12px;color:var(--text-muted);text-align:left;">' +
+        '<th style="padding:10px 12px;font-weight:600;">登録日</th>' +
+        '<th style="padding:10px 12px;font-weight:600;">お名前</th>' +
+        '<th style="padding:10px 12px;font-weight:600;">電話番号</th>' +
+        '<th style="padding:10px 12px;font-weight:600;">メールアドレス</th>' +
+        '<th style="padding:10px 12px;font-weight:600;">年齢</th>' +
+        '<th style="padding:10px 12px;font-weight:600;">肌タイプ・お悩み</th>' +
+        '<th style="padding:10px 12px;font-weight:600;">店舗</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows_html + '</tbody>' +
+    '</table></div>';
 }
 
 function changeCounselingCustomer(cid) { selectedCustomerId = cid; renderView('counseling'); }
