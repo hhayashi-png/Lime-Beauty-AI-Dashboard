@@ -699,7 +699,11 @@ async function loadCustomersFromAPI() {
   const data = await fetchFromGAS('getCustomers');
   if (!data || !Array.isArray(data)) return CUSTOMERS;
   CUSTOMERS.length = 0; data.forEach(c => CUSTOMERS.push(c));
-  apiDataCache.customers = data; apiDataCache.lastFetch = new Date(); return CUSTOMERS;
+  CUSTOMERS = CUSTOMERS.filter(function(c) {
+    if (!c.name || c.name === 'LINE新規') return false;
+    return true;
+  });
+  apiDataCache.customers = CUSTOMERS.slice(); apiDataCache.lastFetch = new Date(); return CUSTOMERS;
 }
 async function loadContractsFromAPI() {
   if (!USE_REAL_API) return CONTRACTS;
@@ -1212,9 +1216,9 @@ function renderCounselingView() {
     <div id="tab-counsel-forms" class="tab-content">
       <div style="margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:13px;color:var(--text-muted);white-space:nowrap;">店舗フィルター:</span>
-        <button class="btn btn-secondary btn-sm form-filter-btn active" data-shop="all" onclick="filterFormResponses('all', this)">全店舗</button>
-        <button class="btn btn-secondary btn-sm form-filter-btn" data-shop="ONDARI_NISHIFUNA" onclick="filterFormResponses('ONDARI_NISHIFUNA', this)">西船橋店 オンダリフト</button>
-        <button class="btn btn-secondary btn-sm form-filter-btn" data-shop="PEELING_NISHIFUNA" onclick="filterFormResponses('PEELING_NISHIFUNA', this)">西船橋店 ピーリング</button>
+        <div id="form-filter-buttons" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm form-filter-btn active" data-shop="all" onclick="filterFormResponses('all', this)">全店舗</button>
+        </div>
       </div>
       <div id="form-responses-container">
         <div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">「フォーム回答一覧」タブをクリックしてデータを読み込んでください</div>
@@ -1247,10 +1251,25 @@ async function loadFormResponses() {
     }
     _formResponsesAll = json.data;
     _formResponsesHeaders = Object.keys(json.data[0]).filter(function(k) { return k.indexOf('_') !== 0; });
+    updateFormFilterButtons();
     renderFormResponsesTable(_formResponsesAll);
   } catch(err) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">読み込みエラー: ' + err.message + '</div>';
   }
+}
+
+function updateFormFilterButtons() {
+  var filterArea = document.getElementById('form-filter-buttons');
+  if (!filterArea) return;
+  var shops = {};
+  _formResponsesAll.forEach(function(r) {
+    if (r._shopCode && r._shopLabel) shops[r._shopCode] = r._shopLabel;
+  });
+  var html = '<button class="btn btn-secondary btn-sm form-filter-btn active" data-shop="all" onclick="filterFormResponses(\'all\', this)">全店舗</button>';
+  Object.keys(shops).forEach(function(code) {
+    html += '<button class="btn btn-secondary btn-sm form-filter-btn" data-shop="' + code + '" onclick="filterFormResponses(\'' + code + '\', this)">' + shops[code] + '</button>';
+  });
+  filterArea.innerHTML = html;
 }
 
 function filterFormResponses(shop, btn) {
