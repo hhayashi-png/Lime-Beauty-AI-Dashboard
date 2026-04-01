@@ -28,6 +28,8 @@ function doGet(e) {
   if (action === 'cleanDuplicates') return cleanDuplicates();
   if (action === 'getFormHeaders') return getFormHeaders();
   if (action === 'getRawFormData') return getRawFormData();
+  if (action === 'linkLineId') return linkLineIdByPhone(e.parameter);
+  if (action === 'getLineUsers') return getLineUsers();
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -71,20 +73,32 @@ function doPost(e) {
 function handleFollowEvent(event) {
   try {
     var userId = event.source.userId;
+    if (!userId) return;
+
     var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
     if (!sheet) return;
+
     var existing = findCustomerByLineId(userId);
-    if (!existing) {
-      var newId = generateCustomerId();
-      sheet.appendRow([
-        newId, 'LINE新規', '', '', '', '', '', '', '', '',
-        userId, new Date(), '', 'LINE友だち追加'
-      ]);
+    if (existing) {
+      console.log('既存顧客のLINE再連携: ' + existing.customerId);
+      return;
     }
+
+    var newId = generateCustomerId();
+    var now = new Date();
+    sheet.appendRow([
+      newId, 'LINE新規', '', '', '', '', '', '', '', '',
+      userId, now, '', 'LINE友だち追加', ''
+    ]);
+    console.log('新規LINE顧客登録: ' + newId + ' userId=' + userId);
+
     var props = PropertiesService.getScriptProperties();
     var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
-    if (!token) return;
+    if (!token) {
+      console.error('LINE_CHANNEL_ACCESS_TOKEN が設定されていません');
+      return;
+    }
     pushLineMessage(userId, 'ご登録ありがとうございます！カウンセリングシートのご記入をお願いいたします。');
   } catch(err) {
     console.error('handleFollowEvent error: ' + err.message);
@@ -787,6 +801,46 @@ function findCustomerByName(name) {
     }
   }
   return null;
+}
+
+function linkLineIdByPhone(params) {
+  var phone = params.phone || '';
+  var lineUserId = params.lineUserId || '';
+  if (!phone || !lineUserId) return jsonResponse({ error: 'phone and lineUserId are required' });
+
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var data = sheet.getDataRange().getValues();
+  var normalizedPhone = phone.replace(/[-\s]/g, '');
+
+  for (var i = 1; i < data.length; i++) {
+    var cellPhone = String(data[i][2] || '').replace(/[-\s]/g, '');
+    if (cellPhone && cellPhone === normalizedPhone) {
+      sheet.getRange(i + 1, 11).setValue(lineUserId);
+      console.log('LINE ID紐付け完了: row=' + (i+1) + ' phone=' + phone + ' lineId=' + lineUserId);
+      return jsonResponse({ ok: true, customerId: data[i][0], name: data[i][1] });
+    }
+  }
+  return jsonResponse({ error: '電話番号が見つかりません: ' + phone });
+}
+
+function getLineUsers() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var data = sheet.getDataRange().getValues();
+  var result = [];
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][10]) {
+      result.push({
+        customerId: data[i][0],
+        name: data[i][1],
+        phone: data[i][2],
+        lineUserId: data[i][10],
+        source: data[i][13]
+      });
+    }
+  }
+  return jsonResponse(result);
 }
 
 function setupProperties() {
