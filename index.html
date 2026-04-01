@@ -1232,24 +1232,33 @@ function switchCounselingTab(tabName, btn) {
 }
 
 var _formResponsesAll = [];
+var _formResponsesHeaders = [];
 
 async function loadFormResponses() {
   var container = document.getElementById('form-responses-container');
   if (!container) return;
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">読み込み中...</div>';
-  var data = await fetchFromGAS('getCustomers');
-  if (!data || !Array.isArray(data)) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">データがありません</div>';
-    return;
+  try {
+    var res = await fetch(GAS_API_URL + '?action=getRawFormData');
+    var json = await res.json();
+    if (!json.ok || !Array.isArray(json.data) || json.data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">データがありません</div>';
+      return;
+    }
+    _formResponsesAll = json.data;
+    _formResponsesHeaders = Object.keys(json.data[0]).filter(function(k) { return k.indexOf('_') !== 0; });
+    renderFormResponsesTable(_formResponsesAll);
+  } catch(err) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">読み込みエラー: ' + err.message + '</div>';
   }
-  _formResponsesAll = data;
-  renderFormResponsesTable(_formResponsesAll);
 }
 
 function filterFormResponses(shop, btn) {
   document.querySelectorAll('.form-filter-btn').forEach(function(b) { b.classList.remove('active'); });
   btn.classList.add('active');
-  var filtered = shop === 'all' ? _formResponsesAll : _formResponsesAll.filter(function(c) { return c.shop === shop; });
+  var filtered = shop === 'all' ? _formResponsesAll : _formResponsesAll.filter(function(c) {
+    return c._shopCode === shop;
+  });
   renderFormResponsesTable(filtered);
 }
 
@@ -1260,37 +1269,60 @@ function renderFormResponsesTable(rows) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">データがありません</div>';
     return;
   }
-  var html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">';
-  html += '<thead><tr style="background:var(--primary);color:#fff">';
-  html += '<th style="padding:10px 8px;text-align:left">登録日</th>';
-  html += '<th style="padding:10px 8px;text-align:left">お名前</th>';
-  html += '<th style="padding:10px 8px;text-align:left">電話番号</th>';
-  html += '<th style="padding:10px 8px;text-align:left">メール</th>';
-  html += '<th style="padding:10px 8px;text-align:left">生年月日</th>';
-  html += '<th style="padding:10px 8px;text-align:left">年齢</th>';
-  html += '<th style="padding:10px 8px;text-align:left">肌タイプ</th>';
-  html += '<th style="padding:10px 8px;text-align:left">お悩み</th>';
-  html += '<th style="padding:10px 8px;text-align:left">店舗</th>';
-  html += '<th style="padding:10px 8px;text-align:center">編集</th>';
+  var headers = _formResponsesHeaders || Object.keys(rows[0]).filter(function(k) { return k.indexOf('_') !== 0; });
+  var html = '<div style="margin-bottom:12px;font-size:13px;color:var(--text-muted)">' + rows.length + '件表示中</div>';
+  html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1200px">';
+  html += '<thead><tr style="background:var(--primary);color:#fff;position:sticky;top:0">';
+  html += '<th style="padding:8px 6px;text-align:left;white-space:nowrap;min-width:100px">流入元</th>';
+  for (var h = 0; h < headers.length; h++) {
+    html += '<th style="padding:8px 6px;text-align:left;white-space:nowrap;min-width:80px">' + headers[h] + '</th>';
+  }
+  html += '<th style="padding:8px 6px;text-align:center;white-space:nowrap">詳細</th>';
   html += '</tr></thead><tbody>';
-  var shopLabels = { 'ONDARI_NISHIFUNA': '西船橋店 オンダリフト', 'PEELING_NISHIFUNA': '西船橋店 ピーリング' };
-  rows.forEach(function(c, idx) {
-    var bg = idx % 2 === 0 ? '#fff' : '#f8faf9';
-    html += '<tr style="background:' + bg + ';border-bottom:1px solid #e8ede9;cursor:pointer" onclick="openEditModal(' + JSON.stringify(JSON.stringify(c)) + ')">';
-    html += '<td style="padding:8px">' + (c.registeredDate || '') + '</td>';
-    html += '<td style="padding:8px;font-weight:600">' + (c.name || '') + '</td>';
-    html += '<td style="padding:8px">' + (c.phone || '') + '</td>';
-    html += '<td style="padding:8px">' + (c.email || '') + '</td>';
-    html += '<td style="padding:8px">' + (c.birthdate || c.birthDate || '') + '</td>';
-    html += '<td style="padding:8px">' + (c.age !== '' && c.age !== undefined ? c.age + '歳' : '-') + '</td>';
-    html += '<td style="padding:8px">' + (c.skinType || '') + '</td>';
-    html += '<td style="padding:8px">' + (Array.isArray(c.concerns) ? c.concerns.join('、') : (c.concerns || '')) + '</td>';
-    html += '<td style="padding:8px">' + (shopLabels[c.shop] || c.shop || '') + '</td>';
-    html += '<td style="padding:8px;text-align:center"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openEditModal(' + JSON.stringify(JSON.stringify(c)) + ')">編集</button></td>';
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var bg = i % 2 === 0 ? '#fff' : '#f8faf9';
+    var shopLabel = row._shopLabel || row._shopCode || '';
+    html += '<tr style="background:' + bg + ';border-bottom:1px solid #e8ede9;cursor:pointer" onclick="openRawFormDetail(' + i + ')">';
+    html += '<td style="padding:6px;white-space:nowrap"><span style="background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">' + shopLabel + '</span></td>';
+    for (var h2 = 0; h2 < headers.length; h2++) {
+      var val = row[headers[h2]] || '';
+      var display = val.length > 20 ? val.slice(0, 20) + '...' : val;
+      html += '<td style="padding:6px;white-space:nowrap" title="' + val.replace(/"/g, '&quot;') + '">' + display + '</td>';
+    }
+    html += '<td style="padding:6px;text-align:center"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openRawFormDetail(' + i + ')">詳細</button></td>';
     html += '</tr>';
-  });
+  }
   html += '</tbody></table></div>';
   container.innerHTML = html;
+}
+
+function openRawFormDetail(idx) {
+  var row = _formResponsesAll[idx];
+  if (!row) return;
+  var headers = _formResponsesHeaders || Object.keys(row).filter(function(k) { return k.indexOf('_') !== 0; });
+  var modal = document.getElementById('raw-form-detail-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'raw-form-detail-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+    document.body.appendChild(modal);
+  }
+  var rows = '';
+  rows += '<tr style="background:#f0f7f3"><td colspan="2" style="padding:10px 16px;font-weight:700;color:var(--primary)">流入元：' + (row._shopLabel || '') + '　LINEチャネル：' + (row._lineChannel || '') + '</td></tr>';
+  for (var i = 0; i < headers.length; i++) {
+    var val = row[headers[i]] || '';
+    if (!val) continue;
+    rows += '<tr style="border-bottom:1px solid #eee"><td style="padding:8px 16px;font-size:12px;color:#666;white-space:nowrap;min-width:200px">' + headers[i] + '</td><td style="padding:8px 16px;font-size:13px">' + val + '</td></tr>';
+  }
+  modal.innerHTML = '<div style="background:#fff;border-radius:12px;width:90%;max-width:700px;max-height:90vh;overflow-y:auto">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff">' +
+    '<h3 style="margin:0;font-size:16px">カウンセリング詳細</h3>' +
+    '<button onclick="document.getElementById(\'raw-form-detail-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666">×</button>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse">' + rows + '</table>' +
+    '</div>';
+  modal.style.display = 'flex';
 }
 
 function openEditModal(customerJson) {

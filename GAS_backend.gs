@@ -1,8 +1,18 @@
 var SPREADSHEET_ID = '1CLYVwTISKxHFc583wFNCIIQ_unLFwqjHS-SxOPTYXgE';
 
 var FORM_SHEETS_CONFIG = [
-  { sheetName: '西船橋店【オンダリフト】', shopCode: 'ONDARI_NISHIFUNA' },
-  { sheetName: '【西船橋店】ピーリング', shopCode: 'PEELING_NISHIFUNA' }
+  {
+    sheetName: '西船橋店【オンダリフト】',
+    shopCode: 'ONDARI_NISHIFUNA',
+    shopLabel: '西船橋店 オンダリフト',
+    lineChannel: 'LINE_NISHIFUNA'
+  },
+  {
+    sheetName: '【西船橋店】ピーリング',
+    shopCode: 'PEELING_NISHIFUNA',
+    shopLabel: '西船橋店 ピーリング',
+    lineChannel: 'LINE_NISHIFUNA'
+  }
 ];
 
 var CUSTOMER_DB_SHEET = '顧客DB';
@@ -17,6 +27,7 @@ function doGet(e) {
   if (action === 'updateCustomer') return updateExistingCustomer(e.parameter);
   if (action === 'cleanDuplicates') return cleanDuplicates();
   if (action === 'getFormHeaders') return getFormHeaders();
+  if (action === 'getRawFormData') return getRawFormData();
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -657,19 +668,47 @@ function getConfig(e) {
 
 function getFormHeaders() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var result = [];
-  for (var f = 0; f < FORM_SHEETS_CONFIG.length; f++) {
-    var config = FORM_SHEETS_CONFIG[f];
+  var result = {};
+  for (var i = 0; i < FORM_SHEETS_CONFIG.length; i++) {
+    var config = FORM_SHEETS_CONFIG[i];
     var sheet = ss.getSheetByName(config.sheetName);
-    if (!sheet) {
-      result.push({ sheetName: config.sheetName, shopCode: config.shopCode, headers: [], error: 'シートが見つかりません' });
-      continue;
-    }
+    if (!sheet) continue;
     var lastCol = sheet.getLastColumn();
-    var headers = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
-    result.push({ sheetName: config.sheetName, shopCode: config.shopCode, headers: headers });
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    result[config.shopCode] = {
+      shopLabel: config.shopLabel,
+      headers: headers.filter(function(h) { return h !== ''; })
+    };
   }
   return jsonResponse(result);
+}
+
+function getRawFormData() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var allRows = [];
+  for (var i = 0; i < FORM_SHEETS_CONFIG.length; i++) {
+    var config = FORM_SHEETS_CONFIG[i];
+    var sheet = ss.getSheetByName(config.sheetName);
+    if (!sheet) continue;
+    var lastRow = sheet.getLastRow();
+    var lastCol = sheet.getLastColumn();
+    if (lastRow < 2) continue;
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    var rows = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+    for (var r = 0; r < rows.length; r++) {
+      var obj = {
+        _shopCode: config.shopCode,
+        _shopLabel: config.shopLabel,
+        _lineChannel: config.lineChannel
+      };
+      for (var c = 0; c < headers.length; c++) {
+        var key = String(headers[c]).trim();
+        if (key) obj[key] = rows[r][c] !== undefined ? String(rows[r][c]) : '';
+      }
+      allRows.push(obj);
+    }
+  }
+  return jsonResponse(allRows);
 }
 
 function jsonResponse(obj) {
