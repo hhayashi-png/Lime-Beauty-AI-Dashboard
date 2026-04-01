@@ -2,7 +2,7 @@ var SPREADSHEET_ID = '1CLYVwTISKxHFc583wFNCIIQ_unLFwqjHS-SxOPTYXgE';
 
 var FORM_SHEETS_CONFIG = [
   {
-    sheetName: '西船橋店【オンダリフト】',
+    sheetName: '【西船橋店】オンダリフト',
     shopCode: 'ONDARI_NISHIFUNA',
     shopLabel: '西船橋店 オンダリフト',
     lineChannel: 'LINE_NISHIFUNA'
