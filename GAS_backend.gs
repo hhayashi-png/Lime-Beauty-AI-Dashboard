@@ -15,6 +15,7 @@ function doGet(e) {
   if (action === 'getConfig') return getConfig(e);
   if (action === 'syncAllFormResponses') return syncAllFormResponses();
   if (action === 'updateCustomer') return updateExistingCustomer(e.parameter);
+  if (action === 'cleanDuplicates') return cleanDuplicates();
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -265,8 +266,14 @@ function syncAllFormResponses() {
     if (formData.length <= 1) continue;
     for (var i = 1; i < formData.length; i++) {
       var mapped = mapFormRow(formData[i], formData[0], config.shopCode);
-      if (!mapped || !mapped.phone) continue;
-      var existing = findCustomerByPhone(mapped.phone);
+      if (!mapped.customerName && !mapped.phone) continue;
+      var existing = null;
+      if (mapped.phone) {
+        existing = findCustomerByPhone(mapped.phone);
+      }
+      if (!existing && mapped.customerName) {
+        existing = findCustomerByName(mapped.customerName);
+      }
       if (existing) {
         updateExistingCustomerFromForm(existing.rowIndex, mapped);
       } else {
@@ -304,6 +311,7 @@ function onFormSubmit(e) {
 function mapFormRow(row, headers, shopCode) {
   var result = {
     customerName: '',
+    furigana: '',
     phone: '',
     email: '',
     birthDate: '',
@@ -316,18 +324,53 @@ function mapFormRow(row, headers, shopCode) {
     source: 'フォーム回答',
     registrationDate: new Date()
   };
+  var lastName = '';
+  var firstName = '';
+  var lastKana = '';
+  var firstKana = '';
   for (var i = 0; i < headers.length; i++) {
-    var h = String(headers[i]);
-    var v = row[i] !== undefined ? String(row[i]) : '';
-    if (h.indexOf('名前') >= 0 || h.indexOf('氏名') >= 0) result.customerName = v;
-    else if (h.indexOf('電話') >= 0 || h.indexOf('TEL') >= 0 || h.indexOf('tel') >= 0) result.phone = v.replace(/[-\s]/g, '');
-    else if (h.indexOf('メール') >= 0 || h.indexOf('mail') >= 0 || h.indexOf('Mail') >= 0) result.email = v;
-    else if (h.indexOf('生年月日') >= 0 || h.indexOf('誕生日') >= 0) result.birthDate = v;
+    var h = String(headers[i]).trim();
+    var v = row[i] !== undefined ? String(row[i]).trim() : '';
+    if (h === 'お名前（姓）' || h === '姓' || h === '名字') lastName = v;
+    else if (h === 'お名前（名）' || h === '名' || h === '下の名前') firstName = v;
+    else if (h.indexOf('名前') >= 0 || h.indexOf('氏名') >= 0 || h === 'お名前') {
+      if (!lastName) result.customerName = v;
+    }
+    else if (h === 'フリガナ（セイ）' || h === 'セイ') lastKana = v;
+    else if (h === 'フリガナ（メイ）' || h === 'メイ') firstKana = v;
+    else if (h.indexOf('フリガナ') >= 0 || h.indexOf('ふりがな') >= 0 || h.indexOf('よみがな') >= 0) {
+      if (!lastKana) result.furigana = v;
+    }
+    else if (h.indexOf('電話') >= 0 || h === 'TEL' || h === 'tel' || h.indexOf('携帯') >= 0) {
+      result.phone = v.replace(/[-\s]/g, '');
+    }
+    else if (h.indexOf('メール') >= 0 || h.indexOf('mail') >= 0 || h.indexOf('Mail') >= 0 || h === 'Email') {
+      result.email = v;
+    }
+    else if (h.indexOf('生年月日') >= 0 || h.indexOf('誕生日') >= 0) {
+      result.birthDate = v;
+    }
+    else if (h.indexOf('年齢') >= 0) {
+      if (!result.birthDate) result.ageRaw = v;
+    }
     else if (h.indexOf('性別') >= 0) result.gender = v;
-    else if (h.indexOf('住所') >= 0) result.address = v;
+    else if (h.indexOf('住所') >= 0 || h.indexOf('郵便') >= 0) result.address = v;
     else if (h.indexOf('肌') >= 0 || h.indexOf('スキン') >= 0) result.skinType = v;
     else if (h.indexOf('アレルギー') >= 0) result.allergies = v;
-    else if (h.indexOf('備考') >= 0 || h.indexOf('メモ') >= 0) result.memo = v;
+    else if (h.indexOf('お悩み') >= 0 || h.indexOf('悩み') >= 0 || h.indexOf('ご要望') >= 0) result.memo = v;
+    else if (h.indexOf('備考') >= 0) result.memo = (result.memo ? result.memo + ' ' : '') + v;
+  }
+  if (lastName || firstName) {
+    result.customerName = (lastName + ' ' + firstName).trim();
+  }
+  if (lastKana || firstKana) {
+    result.furigana = (lastKana + ' ' + firstKana).trim();
+  }
+  if (result.birthDate) {
+    var bd = result.birthDate.replace(/[-\/]/g, '');
+    if (/^\d{8}$/.test(bd)) {
+      result.birthDate = bd.slice(0,4) + '/' + bd.slice(4,6) + '/' + bd.slice(6,8);
+    }
   }
   return result;
 }
@@ -402,7 +445,8 @@ function addNewCustomer(mapped) {
     mapped.lineId || '',
     mapped.registrationDate || new Date(),
     mapped.shopCode || '',
-    mapped.source || ''
+    mapped.source || '',
+    mapped.furigana || ''
   ]);
   return newId;
 }
@@ -642,6 +686,50 @@ function initializeSheets() {
     closingSheet.appendRow(['顧客ID', '日付', '店舗コード', '提案コース', '結果', '金額', '備考']);
   }
   return jsonResponse({ status: 'initialized' });
+}
+
+function cleanDuplicates() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var data = sheet.getDataRange().getValues();
+  var seen = {};
+  var rowsToDelete = [];
+  for (var i = 1; i < data.length; i++) {
+    var phone = String(data[i][2] || '').replace(/[-\s]/g, '');
+    var name = String(data[i][1] || '').replace(/\s/g, '');
+    var key = phone || name;
+    if (!key) continue;
+    if (seen[key]) {
+      rowsToDelete.push(i + 1);
+    } else {
+      seen[key] = true;
+    }
+  }
+  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
+    sheet.deleteRow(rowsToDelete[j]);
+  }
+  return jsonResponse({ deleted: rowsToDelete.length });
+}
+
+function findCustomerByName(name) {
+  if (!name) return null;
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var data = sheet.getDataRange().getValues();
+  var normalized = name.replace(/\s/g, '');
+  for (var i = 1; i < data.length; i++) {
+    var cellName = String(data[i][1] || '').replace(/\s/g, '');
+    if (cellName && cellName === normalized) {
+      return {
+        rowIndex: i + 1,
+        customerId: data[i][0],
+        customerName: data[i][1],
+        phone: data[i][2],
+        lineId: data[i][10] || ''
+      };
+    }
+  }
+  return null;
 }
 
 function setupProperties() {
