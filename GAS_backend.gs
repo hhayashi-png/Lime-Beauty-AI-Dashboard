@@ -14,6 +14,7 @@ function doGet(e) {
   if (action === 'getContracts') return getContracts(e);
   if (action === 'getConfig') return getConfig(e);
   if (action === 'syncAllFormResponses') return syncAllFormResponses();
+  if (action === 'updateCustomer') return updateExistingCustomer(e.parameter);
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -133,13 +134,28 @@ function getCustomers(e) {
 
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
-    var age = 0;
+    var age = '';
     if (row[4]) {
-      var birth = new Date(row[4]);
-      var today = new Date();
-      age = today.getFullYear() - birth.getFullYear();
-      var m = today.getMonth() - birth.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+      try {
+        var birthStr = String(row[4]);
+        var birth;
+        if (birthStr.indexOf('/') !== -1) {
+          var parts = birthStr.split('/');
+          birth = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        } else if (birthStr.indexOf('-') !== -1) {
+          var parts = birthStr.split('-');
+          birth = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        } else {
+          birth = new Date(row[4]);
+        }
+        var today = new Date();
+        var a = today.getFullYear() - birth.getFullYear();
+        var m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) a--;
+        age = (a >= 0 && a < 120) ? a : '';
+      } catch(err) {
+        age = '';
+      }
     }
 
     var customerId = row[0] || '';
@@ -397,23 +413,19 @@ function updateExistingCustomer(data) {
   var allData = sheet.getDataRange().getValues();
   var rowIndex = -1;
   for (var i = 1; i < allData.length; i++) {
-    if (allData[i][0] === data.customerId) {
+    if (String(allData[i][0]) === String(data.customerId)) {
       rowIndex = i + 1;
       break;
     }
   }
   if (rowIndex < 0) return jsonResponse({ error: 'Customer not found' });
-  if (data.customerName !== undefined) sheet.getRange(rowIndex, 2).setValue(data.customerName);
-  if (data.phone !== undefined) sheet.getRange(rowIndex, 3).setValue(data.phone);
-  if (data.email !== undefined) sheet.getRange(rowIndex, 4).setValue(data.email);
-  if (data.birthDate !== undefined) sheet.getRange(rowIndex, 5).setValue(data.birthDate);
-  if (data.gender !== undefined) sheet.getRange(rowIndex, 6).setValue(data.gender);
-  if (data.address !== undefined) sheet.getRange(rowIndex, 7).setValue(data.address);
-  if (data.skinType !== undefined) sheet.getRange(rowIndex, 8).setValue(data.skinType);
-  if (data.allergies !== undefined) sheet.getRange(rowIndex, 9).setValue(data.allergies);
-  if (data.memo !== undefined) sheet.getRange(rowIndex, 10).setValue(data.memo);
-  if (data.lineId !== undefined) sheet.getRange(rowIndex, 11).setValue(data.lineId);
-  if (data.shopCode !== undefined) sheet.getRange(rowIndex, 13).setValue(data.shopCode);
+  if (data.name && data.name !== '') sheet.getRange(rowIndex, 2).setValue(data.name);
+  if (data.phone && data.phone !== '') sheet.getRange(rowIndex, 3).setValue(data.phone);
+  if (data.email && data.email !== '') sheet.getRange(rowIndex, 4).setValue(data.email);
+  if (data.birthDate && data.birthDate !== '') sheet.getRange(rowIndex, 5).setValue(data.birthDate);
+  if (data.gender !== undefined) sheet.getRange(rowIndex, 6).setValue(data.gender || '');
+  if (data.skinType !== undefined) sheet.getRange(rowIndex, 8).setValue(data.skinType || '');
+  if (data.memo !== undefined) sheet.getRange(rowIndex, 10).setValue(data.memo || '');
   return jsonResponse({ status: 'updated', customerId: data.customerId });
 }
 

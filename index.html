@@ -1236,13 +1236,13 @@ var _formResponsesAll = [];
 async function loadFormResponses() {
   var container = document.getElementById('form-responses-container');
   if (!container) return;
-  container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">読み込み中...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">読み込み中...</div>';
   var data = await fetchFromGAS('getCustomers');
   if (!data || !Array.isArray(data)) {
-    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">データがありません</div>';
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">データがありません</div>';
     return;
   }
-  _formResponsesAll = data.filter(function(c) { return c.source === 'フォーム回答'; });
+  _formResponsesAll = data;
   renderFormResponsesTable(_formResponsesAll);
 }
 
@@ -1257,36 +1257,106 @@ function renderFormResponsesTable(rows) {
   var container = document.getElementById('form-responses-container');
   if (!container) return;
   if (!rows || rows.length === 0) {
-    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:14px;">データがありません</div>';
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">データがありません</div>';
     return;
   }
-  var shopLabel = { 'ONDARI_NISHIFUNA': '西船橋店 オンダリフト', 'PEELING_NISHIFUNA': '西船橋店 ピーリング' };
-  var rows_html = rows.map(function(c) {
-    return '<tr style="border-bottom:1px solid var(--border);font-size:13px;">' +
-      '<td style="padding:10px 12px;white-space:nowrap;">' + (c.registeredDate || '') + '</td>' +
-      '<td style="padding:10px 12px;">' + (c.name || '') + '</td>' +
-      '<td style="padding:10px 12px;white-space:nowrap;">' + (c.phone || '') + '</td>' +
-      '<td style="padding:10px 12px;">' + (c.email || '') + '</td>' +
-      '<td style="padding:10px 12px;white-space:nowrap;">' + (c.age ? c.age + '歳' : '') + '</td>' +
-      '<td style="padding:10px 12px;">' + (c.skinType || '') + '</td>' +
-      '<td style="padding:10px 12px;white-space:nowrap;">' + (shopLabel[c.shop] || c.shop || '') + '</td>' +
-    '</tr>';
-  }).join('');
-  container.innerHTML =
-    '<div style="overflow-x:auto;">' +
-    '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">' + rows.length + '件</div>' +
-    '<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm);">' +
-      '<thead><tr style="background:var(--surface-2);font-size:12px;color:var(--text-muted);text-align:left;">' +
-        '<th style="padding:10px 12px;font-weight:600;">登録日</th>' +
-        '<th style="padding:10px 12px;font-weight:600;">お名前</th>' +
-        '<th style="padding:10px 12px;font-weight:600;">電話番号</th>' +
-        '<th style="padding:10px 12px;font-weight:600;">メールアドレス</th>' +
-        '<th style="padding:10px 12px;font-weight:600;">年齢</th>' +
-        '<th style="padding:10px 12px;font-weight:600;">肌タイプ・お悩み</th>' +
-        '<th style="padding:10px 12px;font-weight:600;">店舗</th>' +
-      '</tr></thead>' +
-      '<tbody>' + rows_html + '</tbody>' +
-    '</table></div>';
+  var html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">';
+  html += '<thead><tr style="background:var(--primary);color:#fff">';
+  html += '<th style="padding:10px 8px;text-align:left">登録日</th>';
+  html += '<th style="padding:10px 8px;text-align:left">お名前</th>';
+  html += '<th style="padding:10px 8px;text-align:left">電話番号</th>';
+  html += '<th style="padding:10px 8px;text-align:left">メール</th>';
+  html += '<th style="padding:10px 8px;text-align:left">生年月日</th>';
+  html += '<th style="padding:10px 8px;text-align:left">年齢</th>';
+  html += '<th style="padding:10px 8px;text-align:left">肌タイプ</th>';
+  html += '<th style="padding:10px 8px;text-align:left">お悩み</th>';
+  html += '<th style="padding:10px 8px;text-align:left">店舗</th>';
+  html += '<th style="padding:10px 8px;text-align:center">編集</th>';
+  html += '</tr></thead><tbody>';
+  var shopLabels = { 'ONDARI_NISHIFUNA': '西船橋店 オンダリフト', 'PEELING_NISHIFUNA': '西船橋店 ピーリング' };
+  rows.forEach(function(c, idx) {
+    var bg = idx % 2 === 0 ? '#fff' : '#f8faf9';
+    html += '<tr style="background:' + bg + ';border-bottom:1px solid #e8ede9;cursor:pointer" onclick="openEditModal(' + JSON.stringify(JSON.stringify(c)) + ')">';
+    html += '<td style="padding:8px">' + (c.registeredDate || '') + '</td>';
+    html += '<td style="padding:8px;font-weight:600">' + (c.name || '') + '</td>';
+    html += '<td style="padding:8px">' + (c.phone || '') + '</td>';
+    html += '<td style="padding:8px">' + (c.email || '') + '</td>';
+    html += '<td style="padding:8px">' + (c.birthdate || c.birthDate || '') + '</td>';
+    html += '<td style="padding:8px">' + (c.age !== '' && c.age !== undefined ? c.age + '歳' : '-') + '</td>';
+    html += '<td style="padding:8px">' + (c.skinType || '') + '</td>';
+    html += '<td style="padding:8px">' + (Array.isArray(c.concerns) ? c.concerns.join('、') : (c.concerns || '')) + '</td>';
+    html += '<td style="padding:8px">' + (shopLabels[c.shop] || c.shop || '') + '</td>';
+    html += '<td style="padding:8px;text-align:center"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openEditModal(' + JSON.stringify(JSON.stringify(c)) + ')">編集</button></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+}
+
+function openEditModal(customerJson) {
+  var c = typeof customerJson === 'string' ? JSON.parse(customerJson) : customerJson;
+  var modal = document.getElementById('edit-customer-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'edit-customer-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = '<div style="background:#fff;border-radius:12px;padding:32px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
+    '<h3 style="margin:0;font-size:18px">顧客情報編集</h3>' +
+    '<button onclick="document.getElementById(\'edit-customer-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666">×</button>' +
+    '</div>' +
+    '<div style="display:grid;gap:16px">' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">お名前</label>' +
+    '<input id="edit-name" value="' + (c.name || '') + '" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">電話番号</label>' +
+    '<input id="edit-phone" value="' + (c.phone || '') + '" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">メールアドレス</label>' +
+    '<input id="edit-email" value="' + (c.email || '') + '" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">生年月日（例：1990/01/01）</label>' +
+    '<input id="edit-birthdate" value="' + (c.birthdate || c.birthDate || '') + '" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">肌タイプ</label>' +
+    '<input id="edit-skintype" value="' + (c.skinType || '') + '" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">メモ</label>' +
+    '<textarea id="edit-memo" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;height:80px">' + (c.memo || '') + '</textarea></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end">' +
+    '<button onclick="document.getElementById(\'edit-customer-modal\').remove()" style="padding:10px 24px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer">キャンセル</button>' +
+    '<button onclick="saveCustomerEdit(\'' + c.id + '\')" style="padding:10px 24px;border:none;border-radius:6px;background:var(--primary);color:#fff;cursor:pointer;font-weight:600">保存</button>' +
+    '</div>' +
+    '</div>';
+  modal.style.display = 'flex';
+}
+
+async function saveCustomerEdit(customerId) {
+  var params = {
+    action: 'updateCustomer',
+    customerId: customerId,
+    name: document.getElementById('edit-name').value,
+    phone: document.getElementById('edit-phone').value,
+    email: document.getElementById('edit-email').value,
+    birthDate: document.getElementById('edit-birthdate').value,
+    skinType: document.getElementById('edit-skintype').value,
+    memo: document.getElementById('edit-memo').value
+  };
+  var query = Object.keys(params).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+  var url = GAS_API_URL + '?' + query;
+  try {
+    var res = await fetch(url);
+    var json = await res.json();
+    if (json.ok) {
+      document.getElementById('edit-customer-modal').remove();
+      showToast('保存しました', 'success');
+      loadFormResponses();
+    } else {
+      showToast('保存に失敗しました: ' + (json.data && json.data.error ? json.data.error : ''), 'error');
+    }
+  } catch(e) {
+    showToast('通信エラーが発生しました', 'error');
+  }
 }
 
 function changeCounselingCustomer(cid) { selectedCustomerId = cid; renderView('counseling'); }
