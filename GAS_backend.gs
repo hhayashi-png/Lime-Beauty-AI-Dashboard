@@ -30,6 +30,7 @@ function doGet(e) {
   if (action === 'getRawFormData') return getRawFormData();
   if (action === 'linkLineId') return linkLineIdByPhone(e.parameter);
   if (action === 'getLineUsers') return getLineUsers();
+  if (action === 'sendLine') return sendLineFromDashboard(e.parameter);
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
