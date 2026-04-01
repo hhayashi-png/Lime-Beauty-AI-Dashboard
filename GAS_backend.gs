@@ -16,6 +16,7 @@ function doGet(e) {
   if (action === 'syncAllFormResponses') return syncAllFormResponses();
   if (action === 'updateCustomer') return updateExistingCustomer(e.parameter);
   if (action === 'cleanDuplicates') return cleanDuplicates();
+  if (action === 'getFormHeaders') return getFormHeaders();
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -652,6 +653,23 @@ function getConfig(e) {
     customerDbSheet: CUSTOMER_DB_SHEET,
     spreadsheetId: SPREADSHEET_ID
   });
+}
+
+function getFormHeaders() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var result = [];
+  for (var f = 0; f < FORM_SHEETS_CONFIG.length; f++) {
+    var config = FORM_SHEETS_CONFIG[f];
+    var sheet = ss.getSheetByName(config.sheetName);
+    if (!sheet) {
+      result.push({ sheetName: config.sheetName, shopCode: config.shopCode, headers: [], error: 'シートが見つかりません' });
+      continue;
+    }
+    var lastCol = sheet.getLastColumn();
+    var headers = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+    result.push({ sheetName: config.sheetName, shopCode: config.shopCode, headers: headers });
+  }
+  return jsonResponse(result);
 }
 
 function jsonResponse(obj) {
