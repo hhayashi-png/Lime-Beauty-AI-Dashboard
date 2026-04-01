@@ -717,9 +717,16 @@ async function apiUpdateLineId(id, lineUserId) { updateCustomerLineId(id, lineUs
 async function apiAddTreatment(data) { const localId = addTreatment(data); if (USE_REAL_API) { const r = await fetchFromGAS('addTreatment', {data: JSON.stringify(data)}); if (!r) showToast('施術記録のサーバー保存に失敗しました', 'warning'); } return localId; }
 async function apiAddContract(data) { const localId = addContract(data); if (USE_REAL_API) { const r = await fetchFromGAS('addContract', {data: JSON.stringify(data)}); if (!r) showToast('契約のサーバー保存に失敗しました', 'warning'); } return localId; }
 async function apiSaveClosingResult(data) { const localId = saveClosingResult(data); if (USE_REAL_API) { const r = await fetchFromGAS('saveClosingResult', {data: JSON.stringify(data)}); if (!r) showToast('商談記録のサーバー保存に失敗しました', 'warning'); } return localId; }
-async function apiSendLine(lineUserId, messages) {
+async function apiSendLine(customerId, lineUserId, message) {
   if (!USE_REAL_API) { await new Promise(r => setTimeout(r, 1200)); return { ok: true }; }
-  return fetchFromGAS('sendLine', { userId: lineUserId, messages: JSON.stringify(messages) });
+  const url = GAS_API_URL + '?action=sendLine&customerId=' + encodeURIComponent(customerId) + '&message=' + encodeURIComponent(message) + '&userId=' + encodeURIComponent(lineUserId);
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json && json.ok !== undefined) return json;
+    if (json && json.data !== undefined) return json.data;
+    return json;
+  } catch (err) { console.error('[GAS API] sendLine 失敗:', err.message); return null; }
 }
 // ============================================================
 // APP - Main
@@ -1799,26 +1806,23 @@ function selectMsgType(type, btn) {
 
 async function sendLine(cid) {
   const customer = getCustomerById(cid);
-  const lineUserId = (document.getElementById('line-user-id-input') || {}).value || customer.lineUserId;
+  const lineUserId = (document.getElementById('line-user-id-input') || {}).value || customer.lineUserId || '';
   const message = (document.getElementById('line-message-preview') || {}).value || '';
   const beforeImage = (document.getElementById('before-image-url') || {}).value || '';
   const afterImage = (document.getElementById('after-image-url') || {}).value || '';
-  await sendLineMessage(lineUserId, message, beforeImage, afterImage);
-  if (lineUserId) {
+  await sendLineMessage(cid, lineUserId, message, beforeImage, afterImage);
+  if (lineUserId || cid) {
     const msgType = (document.querySelector('.msg-type-btn.active') || {}).dataset && document.querySelector('.msg-type-btn.active').dataset.type || 'カスタム';
     const typeLabels = { thanks: 'お礼メッセージ', 'before-after': 'ビフォーアフター', followup: 'フォローアップ', custom: 'カスタム' };
     addLineHistory({ customerId: cid, customerName: customer.name, date: new Date().toISOString().split('T')[0], type: typeLabels[msgType] || 'カスタム', message });
   }
 }
 
-async function sendLineMessage(lineUserId, message, beforeImage, afterImage) {
-  if (!lineUserId) { showToast('LINE User IDが設定されていません', 'error'); return; }
+async function sendLineMessage(customerId, lineUserId, message, beforeImage, afterImage) {
+  if (!lineUserId && !customerId) { showToast('LINE User IDが設定されていません', 'error'); return; }
   const btn = document.getElementById('line-send-btn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> 送信中...'; btn.classList.add('btn-loading'); }
-  const messages = [{ type: 'text', text: message }];
-  if (beforeImage) { messages.push({ type: 'image', originalContentUrl: beforeImage, previewImageUrl: beforeImage }); messages.push({ type: 'text', text: '⬆️ ビフォー' }); }
-  if (afterImage) { messages.push({ type: 'image', originalContentUrl: afterImage, previewImageUrl: afterImage }); messages.push({ type: 'text', text: '⬆️ アフター' }); }
-  const result = await apiSendLine(lineUserId, messages);
+  const result = await apiSendLine(customerId, lineUserId, message);
   if (btn) { btn.innerHTML = '💬 LINEで送信する'; btn.classList.remove('btn-loading'); }
   if (result && result.ok) showToast('LINEメッセージを送信しました ✓', 'success');
   else { const errMsg = result && result.error ? result.error : '送信に失敗しました'; showToast(errMsg, 'error'); }

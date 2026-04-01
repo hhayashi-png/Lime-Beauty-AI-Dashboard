@@ -705,22 +705,57 @@ function addCustomerManual(data) {
 }
 
 function sendLineFromDashboard(data) {
-  var customerId = data.customerId || '';
-  var message = data.message || '';
-  if (!customerId || !message) return jsonResponse({ error: 'customerId and message are required' });
-  var customer = null;
+  var customerId = data.customerId || data.userId || '';
+  var message = data.message || data.messages || '';
+  var lineUserId = data.lineUserId || data.userId || '';
+
+  if (!message) return jsonResponse({ error: 'message is required' });
+
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
   var allData = sheet.getDataRange().getValues();
-  for (var i = 1; i < allData.length; i++) {
-    if (allData[i][0] === customerId) {
-      customer = { lineId: allData[i][10] || '', customerName: allData[i][1] || '' };
-      break;
+
+  var targetLineId = lineUserId;
+  var customerName = '';
+
+  if (!targetLineId && customerId) {
+    for (var i = 1; i < allData.length; i++) {
+      if (String(allData[i][0]) === String(customerId)) {
+        targetLineId = allData[i][10] || '';
+        customerName = allData[i][1] || '';
+        break;
+      }
     }
   }
-  if (!customer || !customer.lineId) return jsonResponse({ error: 'LINE ID not found for this customer' });
-  pushLineMessage(customer.lineId, message);
-  return jsonResponse({ status: 'ok', sentTo: customer.customerName });
+
+  if (!targetLineId) return jsonResponse({ error: 'LINE IDが見つかりません。顧客詳細からLINE IDを設定してください。' });
+
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  if (!token) return jsonResponse({ error: 'LINE_CHANNEL_ACCESS_TOKENが設定されていません' });
+
+  var payload = {
+    to: targetLineId,
+    messages: [{ type: 'text', text: message }]
+  };
+
+  var res = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { 'Authorization': 'Bearer ' + token },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+
+  var responseCode = res.getResponseCode();
+  var responseText = res.getContentText();
+  console.log('LINE API response: ' + responseCode + ' ' + responseText);
+
+  if (responseCode === 200) {
+    return jsonResponse({ ok: true, sentTo: customerName || targetLineId });
+  } else {
+    return jsonResponse({ error: 'LINE API エラー: ' + responseText });
+  }
 }
 
 function pushLineMessage(lineId, message) {
