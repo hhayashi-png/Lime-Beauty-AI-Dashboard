@@ -99,7 +99,7 @@ function handleFollowEvent(event) {
       console.error('LINE_CHANNEL_ACCESS_TOKEN が設定されていません');
       return;
     }
-    pushLineMessage(userId, 'ご登録ありがとうございます！カウンセリングシートのご記入をお願いいたします。');
+    pushLineMessage(userId, 'ご登録ありがとうございます！\n\nお客様情報と自動で紐付けるため、ご登録のお電話番号をこのトークに数字のみで送信してください。\n例）09012345678\n\nすでにカウンセリングシートをご記入済みの方も、電話番号を送っていただくだけで自動で連携されます。');
   } catch(err) {
     console.error('handleFollowEvent error: ' + err.message);
   }
@@ -110,9 +110,62 @@ function handleMessageEvent(event) {
     var props = PropertiesService.getScriptProperties();
     var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
     if (!token) return;
+
+    var userId = event.source ? event.source.userId : '';
+    var messageText = (event.message && event.message.type === 'text')
+      ? event.message.text.trim() : '';
+
+    // 電話番号っぽい文字列（数字・ハイフン・スペース、10〜13文字）を受け取ったら自動紐付け
+    var normalized = messageText.replace(/[-\s\(\)]/g, '');
+    if (/^\d{10,11}$/.test(normalized)) {
+      var customer = findCustomerByPhone(normalized);
+      if (customer) {
+        // すでに同じLINE IDが紐付いていたらスキップ
+        if (customer.lineId && customer.lineId === userId) {
+          replyLineMessage(event.replyToken, customer.customerName + '様、すでに紐付け済みです！');
+          return;
+        }
+        // 顧客DBのLINE ID列を更新
+        var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+        var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+        sheet.getRange(customer.rowIndex, 11).setValue(userId);
+        // LINE新規レコードが残っていれば削除
+        cleanUpLineNewRecord(userId, customer.rowIndex);
+        console.log('自動紐付け完了: customerId=' + customer.customerId + ' lineId=' + userId);
+        replyLineMessage(event.replyToken,
+          customer.customerName + '様、ご登録ありがとうございます！\n電話番号での本人確認が完了しました。\n今後はこのLINEからご予約・お問い合わせいただけます。');
+        return;
+      } else {
+        // 電話番号が顧客DBにない場合
+        replyLineMessage(event.replyToken,
+          'ご入力の電話番号（' + messageText + '）ではお客様情報が見つかりませんでした。\n' +
+          '・別の電話番号をお試しいただくか\n' +
+          '・カウンセリングシートのご記入をお願いいたします。');
+        return;
+      }
+    }
+
+    // 通常メッセージ
     replyLineMessage(event.replyToken, 'メッセージありがとうございます。担当者より折り返しご連絡いたします。');
   } catch(err) {
     console.error('handleMessageEvent error: ' + err.message);
+  }
+}
+
+function cleanUpLineNewRecord(lineUserId, keepRowIndex) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+    var data = sheet.getDataRange().getValues();
+    for (var i = data.length - 1; i >= 1; i--) {
+      if (i + 1 === keepRowIndex) continue;
+      if (data[i][10] === lineUserId && data[i][1] === 'LINE新規') {
+        sheet.deleteRow(i + 1);
+        console.log('LINE新規レコード削除: row=' + (i + 1));
+      }
+    }
+  } catch(err) {
+    console.error('cleanUpLineNewRecord error: ' + err.message);
   }
 }
 
@@ -511,6 +564,37 @@ function updateExistingCustomerFromForm(rowIndex, mapped) {
   if (mapped.allergies) sheet.getRange(rowIndex, 9).setValue(mapped.allergies);
   if (mapped.memo) sheet.getRange(rowIndex, 10).setValue(mapped.memo);
   if (mapped.shopCode) sheet.getRange(rowIndex, 13).setValue(mapped.shopCode);
+
+  // LINE ID未紐付けなら、LINE新規レコードから自動マッチング
+  var currentLineId = sheet.getRange(rowIndex, 11).getValue();
+  if (!currentLineId && mapped.phone) {
+    autoLinkLineIdFromNewRecord(rowIndex, mapped.phone);
+  }
+}
+
+function autoLinkLineIdFromNewRecord(targetRowIndex, phone) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+    var data = sheet.getDataRange().getValues();
+    // LINE新規レコード（name=LINE新規、lineUserId有、phone無）を探す
+    // ※電話番号では直接マッチできないので、LINE新規が1件だけの場合に限り紐付け
+    var lineNewRows = [];
+    for (var i = 1; i < data.length; i++) {
+      if (i + 1 === targetRowIndex) continue;
+      if (data[i][1] === 'LINE新規' && data[i][10] && !data[i][2]) {
+        lineNewRows.push({ rowIndex: i + 1, lineId: data[i][10] });
+      }
+    }
+    if (lineNewRows.length === 1) {
+      // LINE新規が1件だけなら確実にその人なので自動紐付け
+      sheet.getRange(targetRowIndex, 11).setValue(lineNewRows[0].lineId);
+      sheet.deleteRow(lineNewRows[0].rowIndex);
+      console.log('フォーム→LINE自動紐付け完了: lineId=' + lineNewRows[0].lineId);
+    }
+  } catch(err) {
+    console.error('autoLinkLineIdFromNewRecord error: ' + err.message);
+  }
 }
 
 function addTreatment(data) {
