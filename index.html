@@ -497,6 +497,10 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Hira
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 5.34L6.75 6.75M12 2v2M12 20v2M20 12h2M2 12h2M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41"/></svg>
         <span class="nav-label">最適化</span>
       </div>
+      <div class="nav-item" data-view="settings" style="margin-top:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <span class="nav-label">設定</span>
+      </div>
     </nav>
   </aside>
   <main class="main-content">
@@ -595,6 +599,12 @@ let COUNSELINGS = [
 ];
 
 let CLOSING_RESULTS = [];
+
+// スタッフマスタ（ローカル管理）
+let STAFF_LIST = [
+  { id: 'S001', name: '山本 さくら', role: 'スタッフ', shopCode: 'NISHIFUNA', active: true },
+  { id: 'S002', name: '田村 あかね', role: 'スタッフ', shopCode: 'NISHIFUNA', active: true },
+];
 
 let LINE_HISTORY = [
   { id: 'L0001', customerId: 'C0001', customerName: '田中 美咲', date: '2024-03-10', type: 'お礼メッセージ', message: 'ご来店ありがとうございました。本日の施術はいかがでしたか？', status: '送信済み' },
@@ -739,7 +749,7 @@ let selectedClosingResult = null;
 const VIEW_LABELS = {
   customers: '顧客一覧', counseling: 'カウンセリング', analysis: 'AI分析',
   closing: 'クロージング', contracts: '契約管理', followup: 'フォロー',
-  retrospective: '振り返り', optimization: '最適化'
+  retrospective: '振り返り', optimization: '最適化', settings: '設定'
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -800,6 +810,7 @@ function renderView(view) {
       case 'followup':      container.innerHTML = renderFollowupView();      break;
       case 'retrospective': container.innerHTML = renderRetrospectiveView(); break;
       case 'optimization':  container.innerHTML = renderOptimizationView();  break;
+      case 'settings':      container.innerHTML = renderSettingsView();       break;
     }
     bindViewEvents(view);
     container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
@@ -1142,7 +1153,7 @@ function renderCounselingView() {
             </div>
             <div class="form-group">
               <label class="form-label required">担当スタッフ</label>
-              <input type="text" class="form-input" id="counsel-staff" placeholder="例: 山本 さくら" />
+              <select class="form-select" id="counsel-staff">${getStaffOptions('')}</select>
             </div>
           </div>
           <div class="form-group">
@@ -1433,6 +1444,183 @@ function onCourseSelect(sel) {
   if (sessionsInput && sessions) {
     sessionsInput.value = sessions;
   }
+}
+
+// ============================================================
+// スタッフ管理
+// ============================================================
+function getActiveStaff() {
+  return STAFF_LIST.filter(function(s) { return s.active; });
+}
+
+function getStaffOptions(selectedName) {
+  var html = '<option value="">担当スタッフを選択</option>';
+  STAFF_LIST.forEach(function(s) {
+    if (!s.active) return;
+    var sel = s.name === selectedName ? ' selected' : '';
+    html += '<option value="' + s.name + '"' + sel + '>' + s.name + '（' + s.role + '）</option>';
+  });
+  return html;
+}
+
+function renderSettingsView() {
+  var staffRows = '';
+  STAFF_LIST.forEach(function(s, idx) {
+    var statusBadge = s.active
+      ? '<span style="background:#e8f5ee;color:#52b788;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:600">在籍中</span>'
+      : '<span style="background:#fdeaea;color:#e05555;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:600">退職</span>';
+    staffRows += '<tr style="border-bottom:1px solid #f0f0f0">' +
+      '<td style="padding:12px 16px;font-weight:600">' + s.name + '</td>' +
+      '<td style="padding:12px 16px;color:var(--text-muted)">' + s.role + '</td>' +
+      '<td style="padding:12px 16px;color:var(--text-muted)">' + (s.shopCode || '—') + '</td>' +
+      '<td style="padding:12px 16px">' + statusBadge + '</td>' +
+      '<td style="padding:12px 16px">' +
+        '<div style="display:flex;gap:8px">' +
+          '<button onclick="openEditStaffModal(' + idx + ')" style="padding:6px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:12px">✏️ 編集</button>' +
+          '<button onclick="toggleStaffActive(' + idx + ')" style="padding:6px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:12px">' + (s.active ? '🔴 退職処理' : '🟢 復帰') + '</button>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  });
+
+  return '<div class="page-header" style="margin-bottom:24px">' +
+    '<h2 style="font-size:20px;font-weight:700;margin:0">⚙️ 設定</h2>' +
+    '</div>' +
+    '<div style="max-width:800px">' +
+    '<div style="background:#fff;border-radius:12px;border:1px solid #e8ede9;overflow:hidden;margin-bottom:24px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eee">' +
+    '<div>' +
+    '<div style="font-size:16px;font-weight:700">👩‍💼 スタッフ管理</div>' +
+    '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">スタッフの登録・編集・退職処理ができます</div>' +
+    '</div>' +
+    '<button onclick="openAddStaffModal()" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">＋ スタッフ追加</button>' +
+    '</div>' +
+    '<div style="overflow-x:auto">' +
+    '<table style="width:100%;border-collapse:collapse">' +
+    '<thead><tr style="background:#f8faf9">' +
+    '<th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--text-muted)">名前</th>' +
+    '<th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--text-muted)">役職</th>' +
+    '<th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--text-muted)">店舗</th>' +
+    '<th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--text-muted)">状態</th>' +
+    '<th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--text-muted)">操作</th>' +
+    '</tr></thead>' +
+    '<tbody>' + (staffRows || '<tr><td colspan="5" style="padding:32px;text-align:center;color:var(--text-muted)">スタッフが登録されていません</td></tr>') + '</tbody>' +
+    '</table>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+}
+
+function openAddStaffModal() {
+  var shopOptions = '';
+  if (typeof FORM_SHEETS_CONFIG !== 'undefined') {
+    FORM_SHEETS_CONFIG.forEach(function(s) {
+      shopOptions += '<option value="' + s.shopCode + '">' + (s.shopLabel || s.shopCode) + '</option>';
+    });
+  } else {
+    shopOptions = '<option value="NISHIFUNA">西船橋店</option>';
+  }
+  var modal = document.createElement('div');
+  modal.id = 'staff-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:12px;width:100%;max-width:440px;padding:24px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">' +
+    '<h3 style="margin:0;font-size:16px">スタッフを追加</h3>' +
+    '<button onclick="document.getElementById(\'staff-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;line-height:1">×</button>' +
+    '</div>' +
+    '<div style="display:grid;gap:14px">' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">名前 <span style="color:red">*</span></label>' +
+    '<input id="staff-name-input" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box" placeholder="例：山本 さくら"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">役職</label>' +
+    '<select id="staff-role-input" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box">' +
+    '<option value="スタッフ">スタッフ</option><option value="リーダー">リーダー</option><option value="マネージャー">マネージャー</option><option value="オーナー">オーナー</option>' +
+    '</select></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">店舗</label>' +
+    '<select id="staff-shop-input" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box">' + shopOptions + '</select></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">' +
+    '<button onclick="document.getElementById(\'staff-modal\').remove()" style="padding:10px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:14px">キャンセル</button>' +
+    '<button onclick="submitAddStaff()" style="padding:10px 20px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-weight:600;font-size:14px">追加する</button>' +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+  document.getElementById('staff-name-input').focus();
+}
+
+function submitAddStaff() {
+  var name = (document.getElementById('staff-name-input').value || '').trim();
+  var role = document.getElementById('staff-role-input').value || 'スタッフ';
+  var shopCode = document.getElementById('staff-shop-input').value || '';
+  if (!name) { showToast('名前を入力してください', 'error'); return; }
+  if (STAFF_LIST.some(function(s) { return s.name === name; })) {
+    showToast('同じ名前のスタッフが既に登録されています', 'error'); return;
+  }
+  var newId = 'S' + (STAFF_LIST.length + 1).toString().padStart(3, '0');
+  STAFF_LIST.push({ id: newId, name: name, role: role, shopCode: shopCode, active: true });
+  document.getElementById('staff-modal').remove();
+  showToast(name + ' を登録しました', 'success');
+  renderView('settings');
+}
+
+function openEditStaffModal(idx) {
+  var s = STAFF_LIST[idx];
+  if (!s) return;
+  var shopOptions = '';
+  if (typeof FORM_SHEETS_CONFIG !== 'undefined') {
+    FORM_SHEETS_CONFIG.forEach(function(cfg) {
+      var sel = cfg.shopCode === s.shopCode ? ' selected' : '';
+      shopOptions += '<option value="' + cfg.shopCode + '"' + sel + '>' + (cfg.shopLabel || cfg.shopCode) + '</option>';
+    });
+  } else {
+    shopOptions = '<option value="NISHIFUNA"' + (s.shopCode === 'NISHIFUNA' ? ' selected' : '') + '>西船橋店</option>';
+  }
+  var roleOptions = ['スタッフ','リーダー','マネージャー','オーナー'].map(function(r) {
+    return '<option value="' + r + '"' + (s.role === r ? ' selected' : '') + '>' + r + '</option>';
+  }).join('');
+  var modal = document.createElement('div');
+  modal.id = 'staff-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:12px;width:100%;max-width:440px;padding:24px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">' +
+    '<h3 style="margin:0;font-size:16px">スタッフを編集</h3>' +
+    '<button onclick="document.getElementById(\'staff-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;line-height:1">×</button>' +
+    '</div>' +
+    '<div style="display:grid;gap:14px">' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">名前 <span style="color:red">*</span></label>' +
+    '<input id="staff-name-input" value="' + s.name + '" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box"></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">役職</label>' +
+    '<select id="staff-role-input" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box">' + roleOptions + '</select></div>' +
+    '<div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px">店舗</label>' +
+    '<select id="staff-shop-input" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box">' + shopOptions + '</select></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">' +
+    '<button onclick="document.getElementById(\'staff-modal\').remove()" style="padding:10px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:14px">キャンセル</button>' +
+    '<button onclick="submitEditStaff(' + idx + ')" style="padding:10px 20px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-weight:600;font-size:14px">保存する</button>' +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+}
+
+function submitEditStaff(idx) {
+  var name = (document.getElementById('staff-name-input').value || '').trim();
+  var role = document.getElementById('staff-role-input').value || 'スタッフ';
+  var shopCode = document.getElementById('staff-shop-input').value || '';
+  if (!name) { showToast('名前を入力してください', 'error'); return; }
+  STAFF_LIST[idx].name = name;
+  STAFF_LIST[idx].role = role;
+  STAFF_LIST[idx].shopCode = shopCode;
+  document.getElementById('staff-modal').remove();
+  showToast('スタッフ情報を更新しました', 'success');
+  renderView('settings');
+}
+
+function toggleStaffActive(idx) {
+  var s = STAFF_LIST[idx];
+  s.active = !s.active;
+  showToast(s.name + ' を' + (s.active ? '復帰' : '退職処理') + 'しました', s.active ? 'success' : 'warning');
+  renderView('settings');
 }
 
 function openEditModal(customerJson) {
@@ -1763,7 +1951,7 @@ function openContractModal() {
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label required">金額（円）</label><input type="number" class="form-input" id="new-contract-price" placeholder="例: 150000" min="0" /></div>
-      <div class="form-group"><label class="form-label">担当スタッフ</label><input type="text" class="form-input" id="new-contract-staff" placeholder="例: 山本 さくら" /></div>
+      <div class="form-group"><label class="form-label">担当スタッフ</label><select class="form-select" id="new-contract-staff">${getStaffOptions('')}</select></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label required">開始日</label><input type="date" class="form-input" id="new-contract-start" value="${new Date().toISOString().split('T')[0]}" /></div>
