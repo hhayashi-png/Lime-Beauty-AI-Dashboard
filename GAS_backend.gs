@@ -395,25 +395,77 @@ function syncAllFormResponses() {
 }
 
 function onFormSubmit(e) {
-  var sheet = e.source.getActiveSheet();
-  var sheetName = sheet.getName();
-  var shopCode = '';
-  for (var f = 0; f < FORM_SHEETS_CONFIG.length; f++) {
-    if (FORM_SHEETS_CONFIG[f].sheetName === sheetName) {
-      shopCode = FORM_SHEETS_CONFIG[f].shopCode;
-      break;
+  try {
+    var sheet = e.source.getActiveSheet();
+    var sheetName = sheet.getName();
+    var shopCode = '';
+    for (var f = 0; f < FORM_SHEETS_CONFIG.length; f++) {
+      if (FORM_SHEETS_CONFIG[f].sheetName === sheetName) {
+        shopCode = FORM_SHEETS_CONFIG[f].shopCode;
+        break;
+      }
     }
-  }
-  if (!shopCode) return;
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  var row = e.values || sheet.getRange(e.range.getRow(), 1, 1, sheet.getLastColumn()).getValues()[0];
-  var mapped = mapFormRow(row, headers, shopCode);
-  if (!mapped || !mapped.phone) return;
-  var existing = findCustomerByPhone(mapped.phone);
-  if (existing) {
-    updateExistingCustomerFromForm(existing.rowIndex, mapped);
-  } else {
-    addNewCustomer(mapped);
+    if (!shopCode) return;
+
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var row = e.values || sheet.getRange(e.range.getRow(), 1, 1, sheet.getLastColumn()).getValues()[0];
+    var mapped = mapFormRow(row, headers, shopCode);
+    if (!mapped || (!mapped.phone && !mapped.customerName)) return;
+
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var dbSheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+
+    var existing = null;
+    if (mapped.phone) existing = findCustomerByPhone(mapped.phone);
+    if (!existing && mapped.customerName) existing = findCustomerByName(mapped.customerName);
+
+    var customerId = '';
+    if (existing) {
+      updateExistingCustomerFromForm(existing.rowIndex, mapped);
+      customerId = existing.customerId;
+    } else {
+      customerId = addNewCustomer(mapped);
+    }
+
+    if (!customerId) return;
+
+    var lineNewRecords = [];
+    var allData = dbSheet.getDataRange().getValues();
+    for (var i = 1; i < allData.length; i++) {
+      if (String(allData[i][13]) === 'LINE友だち追加' &&
+          (!allData[i][1] || allData[i][1] === 'LINE新規') &&
+          allData[i][10]) {
+        lineNewRecords.push({
+          rowIndex: i + 1,
+          lineUserId: allData[i][10],
+          customerId: allData[i][0]
+        });
+      }
+    }
+
+    if (lineNewRecords.length === 1) {
+      var lineRecord = lineNewRecords[0];
+      var allData2 = dbSheet.getDataRange().getValues();
+      for (var j = 1; j < allData2.length; j++) {
+        if (String(allData2[j][0]) === String(customerId)) {
+          dbSheet.getRange(j + 1, 11).setValue(lineRecord.lineUserId);
+          console.log('フォーム回答でLINE自動紐づけ完了: customerId=' + customerId + ' lineUserId=' + lineRecord.lineUserId);
+          break;
+        }
+      }
+      dbSheet.deleteRow(lineRecord.rowIndex);
+
+      var props = PropertiesService.getScriptProperties();
+      var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+      if (token && mapped.customerName) {
+        pushLineMessage(token, lineRecord.lineUserId,
+          mapped.customerName + '様、カウンセリングシートのご記入ありがとうございます！\n担当スタッフより改めてご連絡いたします。');
+      }
+    } else if (lineNewRecords.length > 1) {
+      console.log('LINE新規が複数件あるため自動紐づけをスキップ: ' + lineNewRecords.length + '件');
+    }
+  } catch(err) {
+    console.error('onFormSubmit error: ' + err.message);
   }
 }
 
