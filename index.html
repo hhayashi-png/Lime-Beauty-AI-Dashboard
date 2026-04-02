@@ -1295,31 +1295,32 @@ function renderFormResponsesTable(rows) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">データがありません</div>';
     return;
   }
-  var headers = _formResponsesHeaders || Object.keys(rows[0]).filter(function(k) { return k.indexOf('_') !== 0; });
   var html = '<div style="margin-bottom:12px;font-size:13px;color:var(--text-muted)">' + rows.length + '件表示中</div>';
-  html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1200px">';
-  html += '<thead><tr style="background:var(--primary);color:#fff;position:sticky;top:0">';
-  html += '<th style="padding:8px 6px;text-align:left;white-space:nowrap;min-width:100px">流入元</th>';
-  for (var h = 0; h < headers.length; h++) {
-    html += '<th style="padding:8px 6px;text-align:left;white-space:nowrap;min-width:80px">' + headers[h] + '</th>';
-  }
-  html += '<th style="padding:8px 6px;text-align:center;white-space:nowrap">詳細</th>';
-  html += '</tr></thead><tbody>';
-  for (var i = 0; i < rows.length; i++) {
-    var row = rows[i];
-    var bg = i % 2 === 0 ? '#fff' : '#f8faf9';
+  html += '<div style="display:flex;flex-direction:column;gap:12px">';
+  rows.forEach(function(row, idx) {
     var shopLabel = row._shopLabel || row._shopCode || '';
-    html += '<tr style="background:' + bg + ';border-bottom:1px solid #e8ede9;cursor:pointer" onclick="openRawFormDetail(' + i + ')">';
-    html += '<td style="padding:6px;white-space:nowrap"><span style="background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">' + shopLabel + '</span></td>';
-    for (var h2 = 0; h2 < headers.length; h2++) {
-      var val = row[headers[h2]] || '';
-      var display = val.length > 20 ? val.slice(0, 20) + '...' : val;
-      html += '<td style="padding:6px;white-space:nowrap" title="' + val.replace(/"/g, '&quot;') + '">' + display + '</td>';
-    }
-    html += '<td style="padding:6px;text-align:center"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openRawFormDetail(' + i + ')">詳細</button></td>';
-    html += '</tr>';
-  }
-  html += '</tbody></table></div>';
+    var lastName = row['お名前（姓）'] || '';
+    var firstName = row['お名前（名）'] || '';
+    var name = (lastName + ' ' + firstName).trim() || row['お名前'] || '名前未入力';
+    var phone = row['電話番号'] || '';
+    var email = row['メールアドレス'] || '';
+    var timestamp = row['タイムスタンプ'] || '';
+    var memo = row['_memo'] || '';
+    html += '<div style="background:#fff;border-radius:12px;border:1px solid #e8ede9;padding:16px;cursor:pointer" onclick="openRawFormDetail(' + idx + ')">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">';
+    html += '<span style="background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">' + shopLabel + '</span>';
+    html += '<span style="font-size:11px;color:var(--text-muted)">' + timestamp + '</span>';
+    html += '</div>';
+    html += '<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openRawFormDetail(' + idx + ')" style="white-space:nowrap">詳細</button>';
+    html += '</div>';
+    html += '<div style="font-size:16px;font-weight:700;margin-bottom:6px">' + name + '</div>';
+    if (phone) html += '<div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">📞 ' + phone + '</div>';
+    if (email) html += '<div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">✉️ ' + email + '</div>';
+    if (memo) html += '<div style="font-size:13px;background:#f0f7f3;border-radius:8px;padding:8px;margin-top:8px">📝 ' + memo + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
   container.innerHTML = html;
 }
 
@@ -1331,24 +1332,107 @@ function openRawFormDetail(idx) {
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'raw-form-detail-modal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto';
     document.body.appendChild(modal);
   }
-  var rows = '';
-  rows += '<tr style="background:#f0f7f3"><td colspan="2" style="padding:10px 16px;font-weight:700;color:var(--primary)">流入元：' + (row._shopLabel || '') + '　LINEチャネル：' + (row._lineChannel || '') + '</td></tr>';
+  var tableRows = '';
+  tableRows += '<tr style="background:#f0f7f3"><td colspan="2" style="padding:10px 16px;font-weight:700;color:var(--primary)">流入元：' + (row._shopLabel || '') + '</td></tr>';
   for (var i = 0; i < headers.length; i++) {
     var val = row[headers[i]] || '';
     if (!val) continue;
-    rows += '<tr style="border-bottom:1px solid #eee"><td style="padding:8px 16px;font-size:12px;color:#666;white-space:nowrap;min-width:200px">' + headers[i] + '</td><td style="padding:8px 16px;font-size:13px">' + val + '</td></tr>';
+    tableRows += '<tr style="border-bottom:1px solid #eee"><td style="padding:8px 12px;font-size:12px;color:#666;white-space:nowrap;min-width:120px;vertical-align:top">' + headers[i] + '</td><td style="padding:8px 12px;font-size:13px;word-break:break-all">' + val + '</td></tr>';
   }
-  modal.innerHTML = '<div style="background:#fff;border-radius:12px;width:90%;max-width:700px;max-height:90vh;overflow-y:auto">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff">' +
+  var existingMemo = row['_memo'] || '';
+  var existingPhotos = row['_photos'] ? JSON.parse(row['_photos']) : [];
+  var photoHtml = '';
+  existingPhotos.forEach(function(src, pi) {
+    photoHtml += '<div style="position:relative;display:inline-block;margin:4px">';
+    photoHtml += '<img src="' + src + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onclick="viewPhoto(\'' + src + '\')">';
+    photoHtml += '<button onclick="removePhoto(' + idx + ',' + pi + ')" style="position:absolute;top:-6px;right:-6px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:20px;text-align:center">×</button>';
+    photoHtml += '</div>';
+  });
+  modal.innerHTML = '<div style="background:#fff;border-radius:12px;width:100%;max-width:680px;margin:auto">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;border-radius:12px 12px 0 0">' +
     '<h3 style="margin:0;font-size:16px">カウンセリング詳細</h3>' +
-    '<button onclick="document.getElementById(\'raw-form-detail-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666">×</button>' +
+    '<button onclick="document.getElementById(\'raw-form-detail-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;line-height:1">×</button>' +
     '</div>' +
-    '<table style="width:100%;border-collapse:collapse">' + rows + '</table>' +
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">' + tableRows + '</table></div>' +
+    '<div style="padding:16px 20px;border-top:1px solid #eee">' +
+    '<div style="font-weight:600;margin-bottom:8px;font-size:14px">📝 メモ</div>' +
+    '<textarea id="detail-memo-' + idx + '" placeholder="メモを入力..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;height:80px;box-sizing:border-box;resize:vertical">' + existingMemo + '</textarea>' +
+    '</div>' +
+    '<div style="padding:0 20px 16px">' +
+    '<div style="font-weight:600;margin-bottom:8px;font-size:14px">📷 写真（最大10枚）</div>' +
+    '<div id="photo-preview-' + idx + '" style="margin-bottom:10px">' + (photoHtml || '<span style="font-size:13px;color:var(--text-muted)">写真なし</span>') + '</div>' +
+    '<label style="display:inline-block;padding:8px 16px;background:#f0f7f3;border:1px dashed var(--primary);border-radius:8px;cursor:pointer;font-size:13px;color:var(--primary)">' +
+    '＋ 写真を追加（' + existingPhotos.length + '/10枚）' +
+    '<input type="file" accept="image/*" multiple style="display:none" onchange="handlePhotoUpload(event,' + idx + ')">' +
+    '</label>' +
+    '</div>' +
+    '<div style="padding:0 20px 20px;display:flex;gap:10px;justify-content:flex-end">' +
+    '<button onclick="document.getElementById(\'raw-form-detail-modal\').remove()" style="padding:10px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:14px">閉じる</button>' +
+    '<button onclick="saveFormDetailMemo(' + idx + ')" style="padding:10px 20px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-weight:600;font-size:14px">💾 保存</button>' +
+    '</div>' +
     '</div>';
   modal.style.display = 'flex';
+}
+
+function viewPhoto(src) {
+  var viewer = document.createElement('div');
+  viewer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer';
+  viewer.onclick = function() { document.body.removeChild(viewer); };
+  viewer.innerHTML = '<img src="' + src + '" style="max-width:95%;max-height:95%;object-fit:contain;border-radius:8px">';
+  document.body.appendChild(viewer);
+}
+
+function handlePhotoUpload(event, idx) {
+  var files = Array.from(event.target.files);
+  var row = _formResponsesAll[idx];
+  var existing = row['_photos'] ? JSON.parse(row['_photos']) : [];
+  var remaining = 10 - existing.length;
+  if (files.length > remaining) {
+    showToast('写真は最大10枚までです（あと' + remaining + '枚追加可能）', 'warning');
+    files = files.slice(0, remaining);
+  }
+  var loaded = 0;
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      existing.push(e.target.result);
+      loaded++;
+      if (loaded === files.length) {
+        row['_photos'] = JSON.stringify(existing);
+        openRawFormDetail(idx);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removePhoto(idx, pi) {
+  var row = _formResponsesAll[idx];
+  var photos = row['_photos'] ? JSON.parse(row['_photos']) : [];
+  photos.splice(pi, 1);
+  row['_photos'] = JSON.stringify(photos);
+  openRawFormDetail(idx);
+}
+
+function saveFormDetailMemo(idx) {
+  var row = _formResponsesAll[idx];
+  var memoEl = document.getElementById('detail-memo-' + idx);
+  if (memoEl) row['_memo'] = memoEl.value;
+  showToast('保存しました', 'success');
+  document.getElementById('raw-form-detail-modal').remove();
+  renderFormResponsesTable(_formResponsesAll);
+}
+
+function onCourseSelect(sel) {
+  var opt = sel.options[sel.selectedIndex];
+  var sessions = opt.getAttribute('data-sessions');
+  var sessionsInput = document.getElementById('new-contract-sessions');
+  if (sessionsInput && sessions) {
+    sessionsInput.value = sessions;
+  }
 }
 
 function openEditModal(customerJson) {
@@ -1663,7 +1747,16 @@ function renderContractsView() {
 function openContractModal() {
   const content = `
     <div class="form-group"><label class="form-label required">顧客</label><select class="form-select" id="new-contract-customer">${CUSTOMERS.map(c => '<option value="' + c.id + '">' + c.name + '</option>').join('')}</select></div>
-    <div class="form-group"><label class="form-label required">コース名</label><input type="text" class="form-input" id="new-contract-content" placeholder="例: プレミアムホワイトニングコース" /></div>
+    <div class="form-group"><label class="form-label required">コース名</label><select id="new-contract-content" onchange="onCourseSelect(this)" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px">
+  <option value="">コースを選択してください</option>
+  <option value="オンダリフト 3回券" data-sessions="3">オンダリフト 3回券（3回）</option>
+  <option value="オンダリフト 5回券" data-sessions="5">オンダリフト 5回券（5回）</option>
+  <option value="オンダリフト 10回券" data-sessions="10">オンダリフト 10回券（10回）</option>
+  <option value="ピーリング 3回券" data-sessions="3">ピーリング 3回券（3回）</option>
+  <option value="ピーリング 5回券" data-sessions="5">ピーリング 5回券（5回）</option>
+  <option value="ピーリング 10回券" data-sessions="10">ピーリング 10回券（10回）</option>
+  <option value="その他">その他（手動入力）</option>
+</select></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label required">タイプ</label><select class="form-select" id="new-contract-type"><option value="回数券">回数券</option><option value="役務">役務</option></select></div>
       <div class="form-group"><label class="form-label required">総回数</label><input type="number" class="form-input" id="new-contract-sessions" placeholder="例: 10" min="1" /></div>
