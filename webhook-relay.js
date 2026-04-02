@@ -1,12 +1,18 @@
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxUBsEzbrUcEZepMfAgEt34jIK3DQjYhDzXA1VFvSP4xvcM5BuW_u_qt4GClxzjBdp9/exec';
+
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request));
 });
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxUBsEzbrUcEZepMfAgEt34jIK3DQjYhDzXA1VFvSP4xvcM5BuW_u_qt4GClxzjBdp9/exec';
-
 async function handleRequest(request) {
   if (request.method === 'GET') {
-    return new Response(JSON.stringify({status: 'ok', message: 'LINE Webhook Relay is running'}), {
+    const url = new URL(request.url);
+    const shop = url.searchParams.get('shop') || '';
+    return new Response(JSON.stringify({
+      status: 'ok',
+      message: 'LINE Webhook Relay is running',
+      shop: shop
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -14,9 +20,13 @@ async function handleRequest(request) {
 
   if (request.method === 'POST') {
     try {
+      const url = new URL(request.url);
+      const shop = url.searchParams.get('shop') || 'NISHIFUNA';
       const body = await request.text();
 
-      fetch(GAS_URL, {
+      const gasUrl = GAS_URL + '?shop=' + encodeURIComponent(shop);
+
+      fetch(gasUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body,

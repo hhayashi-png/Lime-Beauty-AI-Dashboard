@@ -39,14 +39,12 @@ function doPost(e) {
     var body = JSON.parse(e.postData.contents);
 
     if (body.events) {
+      var shopCode = (e.parameter && e.parameter.shop) ? e.parameter.shop : 'NISHIFUNA';
       var events = body.events;
       for (var i = 0; i < events.length; i++) {
         var event = events[i];
-        if (event.type === 'follow') {
-          handleFollowEvent(event);
-        } else if (event.type === 'message') {
-          handleMessageEvent(event);
-        }
+        if (event.type === 'follow') handleFollowEvent(event, shopCode);
+        if (event.type === 'message') handleMessageEvent(event);
       }
       return ContentService.createTextOutput(JSON.stringify({status: 'ok'}))
         .setMimeType(ContentService.MimeType.JSON);
@@ -71,7 +69,7 @@ function doPost(e) {
   }
 }
 
-function handleFollowEvent(event) {
+function handleFollowEvent(event, shopCode) {
   try {
     var userId = event.source.userId;
     if (!userId) return;
@@ -83,24 +81,30 @@ function handleFollowEvent(event) {
     var existing = findCustomerByLineId(userId);
     if (existing) {
       console.log('既存顧客のLINE再連携: ' + existing.customerId);
-      return;
+    } else {
+      var newId = generateCustomerId();
+      var now = new Date();
+      sheet.appendRow([
+        newId, 'LINE新規', '', '', '', '', '', '', '', '',
+        userId, now, shopCode || '', 'LINE友だち追加', ''
+      ]);
+      console.log('新規LINE顧客登録: ' + newId + ' userId=' + userId + ' shop=' + shopCode);
     }
-
-    var newId = generateCustomerId();
-    var now = new Date();
-    sheet.appendRow([
-      newId, 'LINE新規', '', '', '', '', '', '', '', '',
-      userId, now, '', 'LINE友だち追加', ''
-    ]);
-    console.log('新規LINE顧客登録: ' + newId + ' userId=' + userId);
 
     var props = PropertiesService.getScriptProperties();
     var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
-    if (!token) {
-      console.error('LINE_CHANNEL_ACCESS_TOKEN が設定されていません');
-      return;
+    if (!token) return;
+
+    var shopConfig = null;
+    for (var i = 0; i < FORM_SHEETS_CONFIG.length; i++) {
+      if (FORM_SHEETS_CONFIG[i].shopCode === shopCode) {
+        shopConfig = FORM_SHEETS_CONFIG[i];
+        break;
+      }
     }
-    pushLineMessage(userId, 'ご登録ありがとうございます！\n\nお客様情報と自動で紐付けるため、ご登録のお電話番号をこのトークに数字のみで送信してください。\n例）09012345678\n\nすでにカウンセリングシートをご記入済みの方も、電話番号を送っていただくだけで自動で連携されます。');
+    var shopLabel = shopConfig ? shopConfig.shopLabel : '当サロン';
+
+    pushLineMessage(token, userId, shopLabel + 'にご登録ありがとうございます！\n\nカウンセリングシートのご記入をお願いいたします。\nご記入後、こちらにご登録の電話番号を送っていただくと担当スタッフとスムーズに連絡が取れます。\n例：09012345678');
   } catch(err) {
     console.error('handleFollowEvent error: ' + err.message);
   }
@@ -108,46 +112,71 @@ function handleFollowEvent(event) {
 
 function handleMessageEvent(event) {
   try {
+    var userId = event.source.userId;
+    var replyToken = event.replyToken;
+    var messageText = '';
+    if (event.message && event.message.type === 'text') {
+      messageText = String(event.message.text).trim();
+    }
+    if (!userId || !messageText) return;
+
     var props = PropertiesService.getScriptProperties();
     var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
     if (!token) return;
 
-    var userId = event.source ? event.source.userId : '';
-    var messageText = (event.message && event.message.type === 'text')
-      ? event.message.text.trim() : '';
+    var existing = findCustomerByLineId(userId);
 
-    // 電話番号っぽい文字列（数字・ハイフン・スペース、10〜13文字）を受け取ったら自動紐付け
-    var normalized = messageText.replace(/[-\s\(\)]/g, '');
-    if (/^\d{10,11}$/.test(normalized)) {
-      var customer = findCustomerByPhone(normalized);
-      if (customer) {
-        // すでに同じLINE IDが紐付いていたらスキップ
-        if (customer.lineId && customer.lineId === userId) {
-          replyLineMessage(event.replyToken, customer.customerName + '様、すでに紐付け済みです！');
-          return;
-        }
-        // 顧客DBのLINE ID列を更新
+    var phoneNorm = messageText.replace(/[-\s\(\)]/g, '');
+    var isPhone = /^(0\d{9,10}|\d{10,11})$/.test(phoneNorm);
+
+    if (isPhone) {
+      var matched = findCustomerByPhone(phoneNorm);
+      if (matched) {
         var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
         var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
-        sheet.getRange(customer.rowIndex, 11).setValue(userId);
-        // LINE新規レコードが残っていれば削除
-        cleanUpLineNewRecord(userId, customer.rowIndex);
-        console.log('自動紐付け完了: customerId=' + customer.customerId + ' lineId=' + userId);
-        replyLineMessage(event.replyToken,
-          customer.customerName + '様、ご登録ありがとうございます！\n電話番号での本人確認が完了しました。\n今後はこのLINEからご予約・お問い合わせいただけます。');
+        var data = sheet.getDataRange().getValues();
+        for (var i = 1; i < data.length; i++) {
+          if (String(data[i][0]) === String(matched.customerId)) {
+            sheet.getRange(i + 1, 11).setValue(userId);
+            break;
+          }
+        }
+
+        if (existing && existing.customerId !== matched.customerId) {
+          for (var j = 1; j < data.length; j++) {
+            if (String(data[j][0]) === String(existing.customerId)) {
+              sheet.deleteRow(j + 1);
+              break;
+            }
+          }
+        }
+
+        replyLineMessage(token, replyToken, [{
+          type: 'text',
+          text: matched.customerName + '様、LINE連携が完了しました！\nスタッフからのご連絡をお待ちください。'
+        }]);
+        console.log('LINE ID紐付け完了: ' + matched.customerId + ' userId=' + userId);
         return;
       } else {
-        // 電話番号が顧客DBにない場合
-        replyLineMessage(event.replyToken,
-          'ご入力の電話番号（' + messageText + '）ではお客様情報が見つかりませんでした。\n' +
-          '・別の電話番号をお試しいただくか\n' +
-          '・カウンセリングシートのご記入をお願いいたします。');
+        replyLineMessage(token, replyToken, [{
+          type: 'text',
+          text: '電話番号が見つかりませんでした。\nご来店時にスタッフにお申し付けください。'
+        }]);
         return;
       }
     }
 
-    // 通常メッセージ
-    replyLineMessage(event.replyToken, 'メッセージありがとうございます。担当者より折り返しご連絡いたします。');
+    if (!existing || !existing.customerName || existing.customerName === 'LINE新規') {
+      replyLineMessage(token, replyToken, [{
+        type: 'text',
+        text: 'メッセージありがとうございます。\nご登録のお客様の電話番号を送っていただくと、担当スタッフとスムーズに連絡が取れます。\n例：09012345678'
+      }]);
+    } else {
+      replyLineMessage(token, replyToken, [{
+        type: 'text',
+        text: existing.customerName + '様、メッセージありがとうございます。\n担当スタッフより折り返しご連絡いたします。'
+      }]);
+    }
   } catch(err) {
     console.error('handleMessageEvent error: ' + err.message);
   }
@@ -758,13 +787,24 @@ function sendLineFromDashboard(data) {
   }
 }
 
-function pushLineMessage(lineId, message) {
-  var props = PropertiesService.getScriptProperties();
-  var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+function pushLineMessage(tokenOrLineId, lineIdOrMessage, message) {
+  var token, lineId, text;
+  if (message !== undefined) {
+    // 3引数形式: pushLineMessage(token, lineId, message)
+    token = tokenOrLineId;
+    lineId = lineIdOrMessage;
+    text = message;
+  } else {
+    // 2引数形式: pushLineMessage(lineId, message)
+    var props = PropertiesService.getScriptProperties();
+    token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+    lineId = tokenOrLineId;
+    text = lineIdOrMessage;
+  }
   if (!token) return;
   var payload = {
     to: lineId,
-    messages: [{ type: 'text', text: message }]
+    messages: [{ type: 'text', text: text }]
   };
   UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
     method: 'post',
@@ -775,14 +815,21 @@ function pushLineMessage(lineId, message) {
   });
 }
 
-function replyLineMessage(replyToken, message) {
-  var props = PropertiesService.getScriptProperties();
-  var token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+function replyLineMessage(tokenOrReplyToken, replyTokenOrMessage, messages) {
+  var token, replyToken, payload;
+  if (messages !== undefined) {
+    // 3引数形式: replyLineMessage(token, replyToken, messages[])
+    token = tokenOrReplyToken;
+    replyToken = replyTokenOrMessage;
+    payload = { replyToken: replyToken, messages: messages };
+  } else {
+    // 2引数形式: replyLineMessage(replyToken, message string)
+    var props = PropertiesService.getScriptProperties();
+    token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+    replyToken = tokenOrReplyToken;
+    payload = { replyToken: replyToken, messages: [{ type: 'text', text: replyTokenOrMessage }] };
+  }
   if (!token) return;
-  var payload = {
-    replyToken: replyToken,
-    messages: [{ type: 'text', text: message }]
-  };
   UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
     method: 'post',
     contentType: 'application/json',
