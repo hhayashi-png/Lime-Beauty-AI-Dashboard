@@ -31,6 +31,7 @@ function doGet(e) {
   if (action === 'linkLineId') return linkLineIdByPhone(e.parameter);
   if (action === 'getLineUsers') return getLineUsers();
   if (action === 'sendLine') return sendLineFromDashboard(e.parameter);
+  if (action === 'cleanCustomerDB') return cleanCustomerDB();
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -1082,6 +1083,37 @@ function getLineUsers() {
     }
   }
   return jsonResponse(result);
+}
+
+function cleanCustomerDB() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var data = sheet.getDataRange().getValues();
+
+  var keepNames = ['林 治希', '新里 愛', '髙橋 将太', '儀間 理生', '氏家 大樹'];
+  var rowsToDelete = [];
+
+  for (var i = 1; i < data.length; i++) {
+    var name = String(data[i][1] || '').trim();
+    if (!keepNames.includes(name)) {
+      rowsToDelete.push(i + 1);
+    }
+  }
+
+  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
+    sheet.deleteRow(rowsToDelete[j]);
+  }
+
+  var data2 = sheet.getDataRange().getValues();
+  for (var k = 1; k < data2.length; k++) {
+    var lineId = String(data2[k][9] || '');
+    if (lineId && !lineId.startsWith('U')) {
+      sheet.getRange(k + 1, 10).setValue('');
+    }
+  }
+
+  console.log('クリーニング完了: ' + rowsToDelete.length + '行削除');
+  return jsonResponse({ deleted: rowsToDelete.length });
 }
 
 function setupProperties() {
