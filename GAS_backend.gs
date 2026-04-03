@@ -516,9 +516,31 @@ function mapFormRow(row, headers, shopCode) {
     }
     else if (h.indexOf('性別') >= 0) result.gender = v;
     else if (h.indexOf('住所') >= 0 || h.indexOf('郵便') >= 0) result.address = v;
-    else if (h.indexOf('肌') >= 0 || h.indexOf('スキン') >= 0) result.skinType = v;
-    else if (h.indexOf('アレルギー') >= 0) result.allergies = v;
-    else if (h.indexOf('お悩み') >= 0 || h.indexOf('悩み') >= 0 || h.indexOf('ご要望') >= 0) result.memo = v;
+    // 肌タイプ：「肌タイプ」「肌質」など短い項目名のみ対象（「肌が敏感〜症状はありますか？」は対象外）
+    else if (h === '肌タイプ' || h === '肌質' || h === 'スキンタイプ' ||
+             (h.indexOf('スキン') >= 0 && h.indexOf('タイプ') >= 0)) {
+      result.skinType = v;
+    }
+    // アレルギー・ケロイド・肌症状・敏感肌はアレルギー欄へ（「いいえ」「なし」は除外）
+    else if (h.indexOf('アレルギー') >= 0 || h.indexOf('ケロイド') >= 0 ||
+             (h.indexOf('肌') >= 0 && h.indexOf('症状') >= 0) ||
+             (h.indexOf('肌') >= 0 && h.indexOf('敏感') >= 0)) {
+      if (v && v !== 'いいえ' && v !== 'なし') {
+        result.allergies = result.allergies ? result.allergies + ' / ' + v : v;
+      }
+    }
+    // 症状の詳細（「はいとお答えの方のみ症状を教えてください」など）
+    else if (h.indexOf('症状') >= 0 && h.indexOf('教えて') >= 0) {
+      if (v && v !== 'いいえ' && v !== 'なし') {
+        result.allergies = result.allergies ? result.allergies + '（' + v + '）' : v;
+      }
+    }
+    else if (h.indexOf('お悩み') >= 0 || h.indexOf('悩み') >= 0 || h.indexOf('ご要望') >= 0) {
+      result.memo = result.memo ? result.memo + ' / ' + v : v;
+    }
+    else if (h.indexOf('目的') >= 0 || h.indexOf('ご来店') >= 0) {
+      result.memo = result.memo ? result.memo + ' / ' + v : v;
+    }
     else if (h.indexOf('備考') >= 0) result.memo = (result.memo ? result.memo + ' ' : '') + v;
   }
   if (lastName || firstName) {
