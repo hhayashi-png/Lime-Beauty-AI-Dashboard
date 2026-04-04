@@ -186,10 +186,10 @@ function getCustomers(e) {
       furigana:       String(row[COL_KANA] || ''),
       phone:          String(row[COL_PHONE] || ''),
       email:          String(row[COL_EMAIL] || ''),
-      birthdate:      String(row[COL_BIRTH] || ''),
+      birthdate:      row[COL_BIRTH] ? formatBirthDate(row[COL_BIRTH]) : '',
       age:            age,
       skinType:       String(row[COL_SKIN] || ''),
-      concerns:       String(row[COL_CONCERN] || ''),
+      concerns:       row[COL_CONCERN] ? String(row[COL_CONCERN]).split(/[\/、,]/).map(function(s){return s.trim();}).filter(Boolean) : [],
       shop:           String(row[COL_SHOP] || ''),
       lineUserId:     String(row[COL_LINE_ID] || ''),
       lineInflowDate: row[COL_LINE_DT] ? Utilities.formatDate(new Date(row[COL_LINE_DT]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
@@ -506,15 +506,34 @@ function generateId() {
 
 function pad(n) { return ('0'+n).slice(-2); }
 
+function formatBirthDate(val) {
+  if (!val) return '';
+  try {
+    var d = new Date(val);
+    if (isNaN(d.getTime())) return String(val);
+    return Utilities.formatDate(d, 'Asia/Tokyo', 'yyyy/MM/dd');
+  } catch(e) { return String(val); }
+}
+
 function calcAge(birthVal) {
   if (!birthVal) return '';
   try {
-    var s = String(birthVal);
-    var parts;
-    if (s.indexOf('/') !== -1) parts = s.split('/');
-    else if (s.indexOf('-') !== -1) parts = s.split('-');
-    else return '';
-    var birth = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    var birth;
+    if (birthVal instanceof Date) {
+      birth = birthVal;
+    } else {
+      var s = String(birthVal);
+      if (s.indexOf('/') !== -1) {
+        var p = s.split('/');
+        birth = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+      } else if (s.indexOf('-') !== -1) {
+        var p = s.split('-');
+        birth = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+      } else {
+        birth = new Date(s);
+      }
+    }
+    if (isNaN(birth.getTime())) return '';
     var today = new Date();
     var age = today.getFullYear() - birth.getFullYear();
     if (today.getMonth() < birth.getMonth() || (today.getMonth()===birth.getMonth() && today.getDate()<birth.getDate())) age--;
