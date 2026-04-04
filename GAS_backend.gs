@@ -85,9 +85,10 @@ function handleFollowEvent(event, shopCode) {
     } else {
       var newId = generateCustomerId();
       var now = new Date();
+      // 列順: ID,氏名,よみがな,電話,メール,生年月日,肌タイプ,お悩み,店舗,LINE_userId,LINE流入日時,ステータス,メモ,登録日時,最終更新
       sheet.appendRow([
-        newId, 'LINE新規', '', '', '', '', '', '', '', '',
-        userId, now, shopCode || '', 'LINE友だち追加', ''
+        newId, 'LINE新規', '', '', '', '', '', '', shopCode || '',
+        userId, now, 'LINE友だち追加', '', now, ''
       ]);
       console.log('新規LINE顧客登録: ' + newId + ' userId=' + userId + ' shop=' + shopCode);
     }
@@ -138,7 +139,7 @@ function handleMessageEvent(event) {
         var data = sheet.getDataRange().getValues();
         for (var i = 1; i < data.length; i++) {
           if (String(data[i][0]) === String(matched.customerId)) {
-            sheet.getRange(i + 1, 11).setValue(userId);
+            sheet.getRange(i + 1, 10).setValue(userId);  // J列=LINE_userId
             break;
           }
         }
@@ -190,7 +191,7 @@ function cleanUpLineNewRecord(lineUserId, keepRowIndex) {
     var data = sheet.getDataRange().getValues();
     for (var i = data.length - 1; i >= 1; i--) {
       if (i + 1 === keepRowIndex) continue;
-      if (data[i][10] === lineUserId && data[i][1] === 'LINE新規') {
+      if (data[i][9] === lineUserId && data[i][1] === 'LINE新規') {
         sheet.deleteRow(i + 1);
         console.log('LINE新規レコード削除: row=' + (i + 1));
       }
@@ -211,8 +212,10 @@ function handleFollow(data) {
   var newId = generateCustomerId();
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  // 列順: ID,氏名,よみがな,電話,メール,生年月日,肌タイプ,お悩み,店舗,LINE_userId,LINE流入日時,ステータス,メモ,登録日時,最終更新
   sheet.appendRow([
-    newId, displayName, '', '', '', '', '', '', '', '', lineId, new Date(), '', 'LINE友だち追加'
+    newId, displayName, '', '', '', '', '', '', '',
+    lineId, new Date(), 'LINE友だち追加', '', new Date(), ''
   ]);
   return jsonResponse({ status: 'new_customer', customerId: newId });
 }
@@ -246,9 +249,9 @@ function getCustomers(e) {
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     var age = '';
-    if (row[4]) {
+    if (row[5]) {
       try {
-        var birthStr = String(row[4]);
+        var birthStr = String(row[5]);
         var birth;
         if (birthStr.indexOf('/') !== -1) {
           var parts = birthStr.split('/');
@@ -257,7 +260,7 @@ function getCustomers(e) {
           var parts = birthStr.split('-');
           birth = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
         } else {
-          birth = new Date(row[4]);
+          birth = new Date(row[5]);
         }
         var today = new Date();
         var a = today.getFullYear() - birth.getFullYear();
@@ -283,20 +286,18 @@ function getCustomers(e) {
     customers.push({
       id: customerId,
       name: row[1] || '',
-      furigana: '',
-      phone: row[2] || '',
-      email: row[3] || '',
+      furigana: row[2] || '',
+      phone: row[3] || '',
+      email: row[4] || '',
       age: age,
-      gender: row[5] || '',
-      address: row[6] || '',
-      skinType: row[7] || '',
-      allergies: row[8] || '',
-      memo: row[9] || '',
-      lineUserId: row[10] || '',
-      registeredDate: row[11] ? Utilities.formatDate(new Date(row[11]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
-      shop: row[12] || '',
-      source: row[13] || '',
-      status: '新規',
+      skinType: row[6] || '',
+      allergies: row[7] || '',
+      shop: row[8] || '',
+      lineUserId: row[9] || '',
+      lineInflowDate: row[10] ? Utilities.formatDate(new Date(row[10]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
+      status: row[11] || '',
+      memo: row[12] || '',
+      registeredDate: row[13] ? Utilities.formatDate(new Date(row[13]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
       lastVisit: lastVisit,
       treatmentCount: treatmentCount,
       concerns: [],
@@ -328,18 +329,18 @@ function getCustomerDetail(e) {
       var customer = {
         customerId: row[0] || '',
         customerName: row[1] || '',
-        phone: row[2] || '',
-        email: row[3] || '',
-        birthDate: row[4] ? Utilities.formatDate(new Date(row[4]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
-        gender: row[5] || '',
-        address: row[6] || '',
-        skinType: row[7] || '',
-        allergies: row[8] || '',
-        memo: row[9] || '',
-        lineId: row[10] || '',
-        registrationDate: row[11] ? Utilities.formatDate(new Date(row[11]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
-        shopCode: row[12] || '',
-        source: row[13] || ''
+        furigana: row[2] || '',
+        phone: row[3] || '',
+        email: row[4] || '',
+        birthDate: row[5] ? Utilities.formatDate(new Date(row[5]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
+        skinType: row[6] || '',
+        allergies: row[7] || '',
+        shopCode: row[8] || '',
+        lineId: row[9] || '',
+        lineInflowDate: row[10] ? Utilities.formatDate(new Date(row[10]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
+        status: row[11] || '',
+        memo: row[12] || '',
+        registrationDate: row[13] ? Utilities.formatDate(new Date(row[13]), 'Asia/Tokyo', 'yyyy-MM-dd') : ''
       };
       var treatments = [];
       var treatSheet = ss.getSheetByName('施術履歴');
@@ -433,12 +434,12 @@ function onFormSubmit(e) {
     var lineNewRecords = [];
     var allData = dbSheet.getDataRange().getValues();
     for (var i = 1; i < allData.length; i++) {
-      if (String(allData[i][13]) === 'LINE友だち追加' &&
+      if (String(allData[i][11]) === 'LINE友だち追加' &&
           (!allData[i][1] || allData[i][1] === 'LINE新規') &&
-          allData[i][10]) {
+          allData[i][9]) {
         lineNewRecords.push({
           rowIndex: i + 1,
-          lineUserId: allData[i][10],
+          lineUserId: allData[i][9],
           customerId: allData[i][0]
         });
       }
@@ -449,7 +450,7 @@ function onFormSubmit(e) {
       var allData2 = dbSheet.getDataRange().getValues();
       for (var j = 1; j < allData2.length; j++) {
         if (String(allData2[j][0]) === String(customerId)) {
-          dbSheet.getRange(j + 1, 11).setValue(lineRecord.lineUserId);
+          dbSheet.getRange(j + 1, 10).setValue(lineRecord.lineUserId);  // J列=LINE_userId
           console.log('フォーム回答でLINE自動紐づけ完了: customerId=' + customerId + ' lineUserId=' + lineRecord.lineUserId);
           break;
         }
@@ -566,14 +567,14 @@ function findCustomerByPhone(phone) {
   var data = sheet.getDataRange().getValues();
   var normalizedPhone = phone.replace(/[-\s]/g, '');
   for (var i = 1; i < data.length; i++) {
-    var cellPhone = String(data[i][2] || '').replace(/[-\s]/g, '');
+    var cellPhone = String(data[i][3] || '').replace(/[-\s]/g, '');
     if (cellPhone && cellPhone === normalizedPhone) {
       return {
         rowIndex: i + 1,
         customerId: data[i][0],
         customerName: data[i][1],
-        phone: data[i][2],
-        lineId: data[i][10] || ''
+        phone: data[i][3],
+        lineId: data[i][9] || ''
       };
     }
   }
@@ -586,13 +587,13 @@ function findCustomerByLineId(lineId) {
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
   var data = sheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
-    if (data[i][10] === lineId) {
+    if (data[i][9] === lineId) {
       return {
         rowIndex: i + 1,
         customerId: data[i][0],
         customerName: data[i][1],
-        phone: data[i][2],
-        lineId: data[i][10]
+        phone: data[i][3],
+        lineId: data[i][9]
       };
     }
   }
@@ -615,22 +616,23 @@ function addNewCustomer(mapped) {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
   var newId = generateCustomerId();
+  // 列順: ID,氏名,よみがな,電話,メール,生年月日,肌タイプ,お悩み,店舗,LINE_userId,LINE流入日時,ステータス,メモ,登録日時,最終更新
   sheet.appendRow([
     newId,
     mapped.customerName || '',
+    mapped.furigana || '',
     mapped.phone || '',
     mapped.email || '',
     mapped.birthDate || '',
-    mapped.gender || '',
-    mapped.address || '',
     mapped.skinType || '',
     mapped.allergies || '',
-    mapped.memo || '',
-    mapped.lineId || '',
-    mapped.registrationDate || new Date(),
     mapped.shopCode || '',
+    mapped.lineId || '',
+    '',
     mapped.source || '',
-    mapped.furigana || ''
+    mapped.memo || '',
+    mapped.registrationDate || new Date(),
+    new Date()
   ]);
   return newId;
 }
@@ -647,32 +649,37 @@ function updateExistingCustomer(data) {
     }
   }
   if (rowIndex < 0) return jsonResponse({ error: 'Customer not found' });
+  // B列=2:氏名, D列=4:電話, E列=5:メール, F列=6:生年月日, G列=7:肌タイプ, M列=13:メモ, O列=15:最終更新
   if (data.name && data.name !== '') sheet.getRange(rowIndex, 2).setValue(data.name);
-  if (data.phone && data.phone !== '') sheet.getRange(rowIndex, 3).setValue(data.phone);
-  if (data.email && data.email !== '') sheet.getRange(rowIndex, 4).setValue(data.email);
-  if (data.birthDate && data.birthDate !== '') sheet.getRange(rowIndex, 5).setValue(data.birthDate);
-  if (data.gender !== undefined) sheet.getRange(rowIndex, 6).setValue(data.gender || '');
-  if (data.skinType !== undefined) sheet.getRange(rowIndex, 8).setValue(data.skinType || '');
-  if (data.memo !== undefined) sheet.getRange(rowIndex, 10).setValue(data.memo || '');
+  if (data.phone && data.phone !== '') sheet.getRange(rowIndex, 4).setValue(data.phone);
+  if (data.email && data.email !== '') sheet.getRange(rowIndex, 5).setValue(data.email);
+  if (data.birthDate && data.birthDate !== '') sheet.getRange(rowIndex, 6).setValue(data.birthDate);
+  if (data.skinType !== undefined) sheet.getRange(rowIndex, 7).setValue(data.skinType || '');
+  if (data.memo !== undefined) sheet.getRange(rowIndex, 13).setValue(data.memo || '');
+  sheet.getRange(rowIndex, 15).setValue(new Date());
   return jsonResponse({ status: 'updated', customerId: data.customerId });
 }
 
 function updateExistingCustomerFromForm(rowIndex, mapped) {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  // B列=2:氏名, E列=5:メール, F列=6:生年月日, G列=7:肌タイプ, H列=8:お悩み, I列=9:店舗, M列=13:メモ, O列=15:最終更新
   if (mapped.customerName) sheet.getRange(rowIndex, 2).setValue(mapped.customerName);
-  if (mapped.email) sheet.getRange(rowIndex, 4).setValue(mapped.email);
-  if (mapped.birthDate) sheet.getRange(rowIndex, 5).setValue(mapped.birthDate);
-  if (mapped.gender) sheet.getRange(rowIndex, 6).setValue(mapped.gender);
-  if (mapped.address) sheet.getRange(rowIndex, 7).setValue(mapped.address);
-  if (mapped.skinType) sheet.getRange(rowIndex, 8).setValue(mapped.skinType);
-  if (mapped.allergies) sheet.getRange(rowIndex, 9).setValue(mapped.allergies);
-  if (mapped.memo) sheet.getRange(rowIndex, 10).setValue(mapped.memo);
-  if (mapped.shopCode) sheet.getRange(rowIndex, 13).setValue(mapped.shopCode);
+  if (mapped.furigana) sheet.getRange(rowIndex, 3).setValue(mapped.furigana);
+  if (mapped.email) sheet.getRange(rowIndex, 5).setValue(mapped.email);
+  if (mapped.birthDate) sheet.getRange(rowIndex, 6).setValue(mapped.birthDate);
+  if (mapped.skinType) sheet.getRange(rowIndex, 7).setValue(mapped.skinType);
+  if (mapped.allergies) sheet.getRange(rowIndex, 8).setValue(mapped.allergies);
+  if (mapped.shopCode) sheet.getRange(rowIndex, 9).setValue(mapped.shopCode);
+  if (mapped.memo) sheet.getRange(rowIndex, 13).setValue(mapped.memo);
+  sheet.getRange(rowIndex, 15).setValue(new Date());
 
-  // LINE ID未紐付けなら、LINE新規レコードから自動マッチング
-  var currentLineId = sheet.getRange(rowIndex, 11).getValue();
-  if (!currentLineId && mapped.phone) {
+  // LINE ID（J列=10）は絶対に上書きしない — 既存値を保護
+  var currentLineId = sheet.getRange(rowIndex, 10).getValue();  // J列=LINE_userId
+  if (currentLineId) {
+    console.log('LINE ID保護: 既存LINE ID維持 rowIndex=' + rowIndex + ' lineId=' + currentLineId);
+  } else if (mapped.phone) {
+    // LINE ID未紐付けの場合のみ、LINE新規レコードから自動マッチング
     autoLinkLineIdFromNewRecord(rowIndex, mapped.phone);
   }
 }
@@ -687,13 +694,13 @@ function autoLinkLineIdFromNewRecord(targetRowIndex, phone) {
     var lineNewRows = [];
     for (var i = 1; i < data.length; i++) {
       if (i + 1 === targetRowIndex) continue;
-      if (data[i][1] === 'LINE新規' && data[i][10] && !data[i][2]) {
-        lineNewRows.push({ rowIndex: i + 1, lineId: data[i][10] });
+      if (data[i][1] === 'LINE新規' && data[i][9] && !data[i][3]) {
+        lineNewRows.push({ rowIndex: i + 1, lineId: data[i][9] });
       }
     }
     if (lineNewRows.length === 1) {
       // LINE新規が1件だけなら確実にその人なので自動紐付け
-      sheet.getRange(targetRowIndex, 11).setValue(lineNewRows[0].lineId);
+      sheet.getRange(targetRowIndex, 10).setValue(lineNewRows[0].lineId);  // J列=LINE_userId
       sheet.deleteRow(lineNewRows[0].rowIndex);
       console.log('フォーム→LINE自動紐付け完了: lineId=' + lineNewRows[0].lineId);
     }
@@ -825,7 +832,7 @@ function sendLineFromDashboard(data) {
   if (!targetLineId && customerId) {
     for (var i = 1; i < allData.length; i++) {
       if (String(allData[i][0]) === String(customerId)) {
-        targetLineId = allData[i][10] || '';
+        targetLineId = allData[i][9] || '';
         customerName = allData[i][1] || '';
         break;
       }
@@ -1008,7 +1015,7 @@ function cleanDuplicates() {
   var seen = {};
   var rowsToDelete = [];
   for (var i = 1; i < data.length; i++) {
-    var phone = String(data[i][2] || '').replace(/[-\s]/g, '');
+    var phone = String(data[i][3] || '').replace(/[-\s]/g, '');
     var name = String(data[i][1] || '').replace(/\s/g, '');
     var key = phone || name;
     if (!key) continue;
@@ -1037,8 +1044,8 @@ function findCustomerByName(name) {
         rowIndex: i + 1,
         customerId: data[i][0],
         customerName: data[i][1],
-        phone: data[i][2],
-        lineId: data[i][10] || ''
+        phone: data[i][3],
+        lineId: data[i][9] || ''
       };
     }
   }
@@ -1056,9 +1063,9 @@ function linkLineIdByPhone(params) {
   var normalizedPhone = phone.replace(/[-\s]/g, '');
 
   for (var i = 1; i < data.length; i++) {
-    var cellPhone = String(data[i][2] || '').replace(/[-\s]/g, '');
+    var cellPhone = String(data[i][3] || '').replace(/[-\s]/g, '');
     if (cellPhone && cellPhone === normalizedPhone) {
-      sheet.getRange(i + 1, 11).setValue(lineUserId);
+      sheet.getRange(i + 1, 10).setValue(lineUserId);  // J列=LINE_userId
       console.log('LINE ID紐付け完了: row=' + (i+1) + ' phone=' + phone + ' lineId=' + lineUserId);
       return jsonResponse({ ok: true, customerId: data[i][0], name: data[i][1] });
     }
@@ -1072,13 +1079,13 @@ function getLineUsers() {
   var data = sheet.getDataRange().getValues();
   var result = [];
   for (var i = 1; i < data.length; i++) {
-    if (data[i][10]) {
+    if (data[i][9]) {
       result.push({
         customerId: data[i][0],
         name: data[i][1],
-        phone: data[i][2],
-        lineUserId: data[i][10],
-        source: data[i][13]
+        phone: data[i][3],
+        lineUserId: data[i][9],
+        status: data[i][11]
       });
     }
   }
