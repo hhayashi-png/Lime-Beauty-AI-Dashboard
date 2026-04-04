@@ -85,10 +85,23 @@ function handleFollowEvent(event, shopCode) {
     } else {
       var newId = generateCustomerId();
       var now = new Date();
-      // 列順: ID,氏名,よみがな,電話,メール,生年月日,肌タイプ,お悩み,店舗,LINE_userId,LINE流入日時,ステータス,メモ,登録日時,最終更新
+      // 列順: A:ID, B:氏名, C:よみがな, D:電話, E:メール, F:生年月日, G:肌タイプ, H:お悩み, I:店舗, J:LINE_userId, K:LINE流入日時, L:ステータス, M:メモ, N:登録日時, O:最終更新
       sheet.appendRow([
-        newId, 'LINE新規', '', '', '', '', '', '', shopCode || '',
-        userId, now, 'LINE友だち追加', '', now, ''
+        newId,              // A: 顧客ID
+        'LINE新規',          // B: 氏名
+        '',                 // C: よみがな
+        '',                 // D: 電話番号
+        '',                 // E: メールアドレス
+        '',                 // F: 生年月日
+        '',                 // G: 肌タイプ
+        '',                 // H: お悩み
+        shopCode || '',     // I: 店舗コード
+        userId,             // J: LINE_userId
+        now,                // K: LINE流入日時
+        'LINE新規',          // L: ステータス
+        '',                 // M: メモ
+        now,                // N: 登録日時
+        ''                  // O: 最終更新
       ]);
       console.log('新規LINE顧客登録: ' + newId + ' userId=' + userId + ' shop=' + shopCode);
     }
@@ -212,10 +225,23 @@ function handleFollow(data) {
   var newId = generateCustomerId();
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
-  // 列順: ID,氏名,よみがな,電話,メール,生年月日,肌タイプ,お悩み,店舗,LINE_userId,LINE流入日時,ステータス,メモ,登録日時,最終更新
+  // 列順: A:ID, B:氏名, C:よみがな, D:電話, E:メール, F:生年月日, G:肌タイプ, H:お悩み, I:店舗, J:LINE_userId, K:LINE流入日時, L:ステータス, M:メモ, N:登録日時, O:最終更新
   sheet.appendRow([
-    newId, displayName, '', '', '', '', '', '', '',
-    lineId, new Date(), 'LINE友だち追加', '', new Date(), ''
+    newId,              // A: 顧客ID
+    displayName,        // B: 氏名
+    '',                 // C: よみがな
+    '',                 // D: 電話番号
+    '',                 // E: メールアドレス
+    '',                 // F: 生年月日
+    '',                 // G: 肌タイプ
+    '',                 // H: お悩み
+    '',                 // I: 店舗コード
+    lineId,             // J: LINE_userId
+    new Date(),         // K: LINE流入日時
+    'LINE友だち追加',     // L: ステータス
+    '',                 // M: メモ
+    new Date(),         // N: 登録日時
+    ''                  // O: 最終更新
   ]);
   return jsonResponse({ status: 'new_customer', customerId: newId });
 }
@@ -616,23 +642,23 @@ function addNewCustomer(mapped) {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
   var newId = generateCustomerId();
-  // 列順: ID,氏名,よみがな,電話,メール,生年月日,肌タイプ,お悩み,店舗,LINE_userId,LINE流入日時,ステータス,メモ,登録日時,最終更新
+  // 列順: A:ID, B:氏名, C:よみがな, D:電話, E:メール, F:生年月日, G:肌タイプ, H:お悩み, I:店舗, J:LINE_userId, K:LINE流入日時, L:ステータス, M:メモ, N:登録日時, O:最終更新
   sheet.appendRow([
-    newId,
-    mapped.customerName || '',
-    mapped.furigana || '',
-    mapped.phone || '',
-    mapped.email || '',
-    mapped.birthDate || '',
-    mapped.skinType || '',
-    mapped.allergies || '',
-    mapped.shopCode || '',
-    mapped.lineId || '',
-    '',
-    mapped.source || '',
-    mapped.memo || '',
-    mapped.registrationDate || new Date(),
-    new Date()
+    newId,                          // A: 顧客ID
+    mapped.customerName || '',      // B: 氏名
+    mapped.furigana || '',          // C: よみがな
+    mapped.phone || '',             // D: 電話番号
+    mapped.email || '',             // E: メールアドレス
+    mapped.birthDate || '',         // F: 生年月日
+    mapped.skinType || '',          // G: 肌タイプ
+    mapped.allergies || '',         // H: お悩み
+    mapped.shopCode || '',          // I: 店舗コード
+    mapped.lineId || '',            // J: LINE_userId
+    '',                             // K: LINE流入日時（空）
+    '新規',                          // L: ステータス（デフォルト新規）
+    mapped.memo || '',              // M: メモ
+    mapped.registrationDate || new Date(), // N: 登録日時
+    new Date()                      // O: 最終更新
   ]);
   return newId;
 }
@@ -1116,6 +1142,10 @@ function cleanCustomerDB() {
     var lineId = String(data2[k][9] || '');
     if (lineId && !lineId.startsWith('U')) {
       sheet.getRange(k + 1, 10).setValue('');
+    }
+    var status = String(data2[k][11] || '');
+    if (status === 'フォーム回答' || status === 'LINE友だち追加' || status === '') {
+      sheet.getRange(k + 1, 12).setValue('新規');
     }
   }
 
