@@ -464,11 +464,20 @@ function sendLineFromDashboard(params) {
 function findCustomerByPhone(phone) {
   if (!phone) return null;
   var norm = phone.replace(/[-\s]/g, '');
+  var norm10 = norm.replace(/^0/, '');
   var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(CUSTOMER_DB_SHEET);
   var data = sheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][COL_PHONE] || '').replace(/[-\s]/g,'') === norm) {
-      return { rowIndex:i+1, customerId:String(data[i][COL_ID]), customerName:String(data[i][COL_NAME]), phone:String(data[i][COL_PHONE]), lineId:String(data[i][COL_LINE_ID]||'') };
+    var cell = String(data[i][COL_PHONE] || '').replace(/[-\s]/g, '');
+    var cell10 = cell.replace(/^0/, '');
+    if (cell && (cell === norm || cell10 === norm10)) {
+      return {
+        rowIndex: i+1,
+        customerId: String(data[i][COL_ID]),
+        customerName: String(data[i][COL_NAME]),
+        phone: String(data[i][COL_PHONE]),
+        lineId: String(data[i][COL_LINE_ID] || '')
+      };
     }
   }
   return null;
