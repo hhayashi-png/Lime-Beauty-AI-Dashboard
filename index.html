@@ -281,7 +281,7 @@ function renderForms(list) {
     return;
   }
   el.innerHTML = list.map((f, i) => {
-    const name = findFormValue(f, ['お名前（姓）','姓','名前','氏名']) + ' ' + findFormValue(f, ['お名前（名）','名']);
+    const name = getFormName(f);
     const phone = findFormValue(f, ['電話','TEL','携帯']);
     return `
       <div class="card form-card" onclick="showFormDetail(${i})">
@@ -317,6 +317,15 @@ function showFormDetail(idx) {
       return detailRow(label, f[k]);
     }).join('');
   document.getElementById('modal').classList.add('show');
+}
+
+function getFormName(row) {
+  var sei = row['お名前（姓）'] || row['姓'] || '';
+  var mei = row['お名前（名）'] || row['名'] || '';
+  if (sei && mei) return sei + ' ' + mei;
+  if (sei) return sei;
+  if (mei) return mei;
+  return row['お名前'] || row['氏名'] || '名前未入力';
 }
 
 function findFormValue(obj, keys) {
