@@ -196,7 +196,7 @@ function getCustomers(e) {
       lineUserId:     String(row[COL_LINE_ID] || ''),
       lineInflowDate: row[COL_LINE_DT] ? Utilities.formatDate(new Date(row[COL_LINE_DT]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
       status:         String(row[COL_STATUS] || '新規'),
-      memo:           String(row[COL_MEMO] || '').replace(/_ts:[^\s]*/g, '').trim(),
+      memo:           String(row[COL_MEMO] || '').replace(/_ts:.*$/g, '').trim(),
       registeredDate: row[COL_REG_DATE] ? Utilities.formatDate(new Date(row[COL_REG_DATE]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
       lastVisit:      lastVisit,
       treatmentCount: treatmentCount,
@@ -235,7 +235,7 @@ function getCustomerDetail(e) {
         lineId:           String(row[COL_LINE_ID] || ''),
         lineInflowDate:   row[COL_LINE_DT] ? Utilities.formatDate(new Date(row[COL_LINE_DT]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
         status:           String(row[COL_STATUS] || '新規'),
-        memo:             String(row[COL_MEMO] || '').replace(/_ts:[^\s]*/g, '').trim(),
+        memo:             String(row[COL_MEMO] || '').replace(/_ts:.*$/g, '').trim(),
         registrationDate: row[COL_REG_DATE] ? Utilities.formatDate(new Date(row[COL_REG_DATE]), 'Asia/Tokyo', 'yyyy-MM-dd') : ''
       };
       var treatments = getTreatments(ss, customerId);
@@ -586,24 +586,11 @@ function findCustomerByName(name) {
 }
 
 function findCustomerByTimestamp(timestamp) {
-  if (!timestamp) return null;
-  var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(CUSTOMER_DB_SHEET);
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][COL_MEMO] || '').indexOf('_ts:' + timestamp) >= 0) {
-      return { rowIndex: i+1, customerId: String(data[i][COL_ID]) };
-    }
-  }
-  return null;
+  return null; // タイムスタンプ方式を廃止
 }
 
 function saveTimestamp(rowIndex, timestamp) {
-  if (!timestamp) return;
-  var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(CUSTOMER_DB_SHEET);
-  var memo = sheet.getRange(rowIndex, COL_MEMO+1).getValue();
-  if (String(memo).indexOf('_ts:') < 0) {
-    sheet.getRange(rowIndex, COL_MEMO+1).setValue((memo ? memo + ' ' : '') + '_ts:' + timestamp);
-  }
+  // タイムスタンプ方式を廃止 — メモ欄には書き込まない
 }
 
 function addNewCustomerWithTimestamp(mapped, timestamp) {
@@ -612,7 +599,7 @@ function addNewCustomerWithTimestamp(mapped, timestamp) {
   var newId = generateId();
   var now = new Date();
   var memo = mapped.memo || '';
-  if (timestamp) memo = (memo ? memo + ' ' : '') + '_ts:' + timestamp;
+  // タイムスタンプはメモに含めず、顧客IDとして管理
   sheet.appendRow([
     newId,
     mapped.customerName || '',
