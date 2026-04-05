@@ -358,12 +358,22 @@ function syncAllFormResponses() {
     for (var i = 1; i < rows.length; i++) {
       var mapped = mapFormRow(rows[i], headers, config.shopCode);
       if (!mapped.customerName && !mapped.phone) continue;
-      var existing = mapped.phone ? findCustomerByPhone(mapped.phone) : null;
-      if (!existing && mapped.customerName) existing = findCustomerByName(mapped.customerName);
+      // タイムスタンプをキーにして重複チェック
+      var timestamp = rows[i][0] ? String(rows[i][0]) : '';
+      var existing = findCustomerByTimestamp(timestamp);
       if (existing) {
         updateCustomerFromForm(existing.rowIndex, mapped);
       } else {
-        addNewCustomer(mapped);
+        var byPhone = mapped.phone ? findCustomerByPhone(mapped.phone) : null;
+        var byName = (!byPhone && mapped.customerName) ? findCustomerByName(mapped.customerName) : null;
+        // 同名・同電話でも別タイムスタンプなら別人として登録
+        if (byPhone && !byPhone.timestamp) {
+          // 既存顧客にタイムスタンプがない場合のみ更新
+          updateCustomerFromForm(byPhone.rowIndex, mapped);
+          saveTimestamp(byPhone.rowIndex, timestamp);
+        } else {
+          addNewCustomerWithTimestamp(mapped, timestamp);
+        }
       }
       total++;
     }
@@ -573,6 +583,54 @@ function findCustomerByName(name) {
     }
   }
   return null;
+}
+
+function findCustomerByTimestamp(timestamp) {
+  if (!timestamp) return null;
+  var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(CUSTOMER_DB_SHEET);
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][COL_MEMO] || '').indexOf('_ts:' + timestamp) >= 0) {
+      return { rowIndex: i+1, customerId: String(data[i][COL_ID]) };
+    }
+  }
+  return null;
+}
+
+function saveTimestamp(rowIndex, timestamp) {
+  if (!timestamp) return;
+  var sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(CUSTOMER_DB_SHEET);
+  var memo = sheet.getRange(rowIndex, COL_MEMO+1).getValue();
+  if (String(memo).indexOf('_ts:') < 0) {
+    sheet.getRange(rowIndex, COL_MEMO+1).setValue((memo ? memo + ' ' : '') + '_ts:' + timestamp);
+  }
+}
+
+function addNewCustomerWithTimestamp(mapped, timestamp) {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var newId = generateId();
+  var now = new Date();
+  var memo = mapped.memo || '';
+  if (timestamp) memo = (memo ? memo + ' ' : '') + '_ts:' + timestamp;
+  sheet.appendRow([
+    newId,
+    mapped.customerName || '',
+    mapped.furigana || '',
+    mapped.phone || '',
+    mapped.email || '',
+    mapped.birthDate || '',
+    mapped.skinType || '',
+    mapped.concerns || '',
+    mapped.shopCode || '',
+    '',
+    '',
+    '新規',
+    memo,
+    now,
+    now
+  ]);
+  return newId;
 }
 
 function generateId() {
@@ -813,13 +871,8 @@ function rebuildFromForms() {
     for (var i = 1; i < rows.length; i++) {
       var mapped = mapFormRow(rows[i], headers, config.shopCode);
       if (!mapped.customerName && !mapped.phone) continue;
-      var existing = mapped.phone ? findCustomerByPhone(mapped.phone) : null;
-      if (!existing && mapped.customerName) existing = findCustomerByName(mapped.customerName);
-      if (existing) {
-        updateCustomerFromForm(existing.rowIndex, mapped);
-      } else {
-        addNewCustomer(mapped);
-      }
+      var timestamp = rows[i][0] ? String(rows[i][0]) : '';
+      addNewCustomerWithTimestamp(mapped, timestamp);
       total++;
     }
   }
