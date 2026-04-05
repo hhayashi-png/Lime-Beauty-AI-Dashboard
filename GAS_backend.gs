@@ -196,7 +196,7 @@ function getCustomers(e) {
       lineUserId:     String(row[COL_LINE_ID] || ''),
       lineInflowDate: row[COL_LINE_DT] ? Utilities.formatDate(new Date(row[COL_LINE_DT]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
       status:         String(row[COL_STATUS] || '新規'),
-      memo:           String(row[COL_MEMO] || ''),
+      memo:           String(row[COL_MEMO] || '').replace(/_ts:[^\s]*/g, '').trim(),
       registeredDate: row[COL_REG_DATE] ? Utilities.formatDate(new Date(row[COL_REG_DATE]), 'Asia/Tokyo', 'yyyy-MM-dd') : '',
       lastVisit:      lastVisit,
       treatmentCount: treatmentCount,
@@ -235,7 +235,7 @@ function getCustomerDetail(e) {
         lineId:           String(row[COL_LINE_ID] || ''),
         lineInflowDate:   row[COL_LINE_DT] ? Utilities.formatDate(new Date(row[COL_LINE_DT]), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : '',
         status:           String(row[COL_STATUS] || '新規'),
-        memo:             String(row[COL_MEMO] || ''),
+        memo:             String(row[COL_MEMO] || '').replace(/_ts:[^\s]*/g, '').trim(),
         registrationDate: row[COL_REG_DATE] ? Utilities.formatDate(new Date(row[COL_REG_DATE]), 'Asia/Tokyo', 'yyyy-MM-dd') : ''
       };
       var treatments = getTreatments(ss, customerId);
