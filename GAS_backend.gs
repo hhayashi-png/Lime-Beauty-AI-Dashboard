@@ -39,6 +39,8 @@ function doGet(e) {
   if (action === 'getLineUsers')         return getLineUsers();
   if (action === 'sendLine')             return sendLineFromDashboard(e.parameter);
   if (action === 'cleanCustomerDB')      return cleanCustomerDB();
+  if (action === 'initDB')               return initDB();
+  if (action === 'rebuildFromForms')     return rebuildFromForms();
   return jsonResponse({ error: 'Unknown action: ' + action });
 }
 
@@ -710,6 +712,53 @@ function cleanCustomerDB() {
   }
   for (var j = toDelete.length-1; j >= 0; j--) sheet.deleteRow(toDelete[j]);
   return jsonResponse({ deleted:toDelete.length });
+}
+
+function initDB() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(CUSTOMER_DB_SHEET);
+  }
+  var headers = sheet.getRange(1, 1, 1, 15).getValues()[0];
+  var expected = ['顧客ID','氏名','よみがな','電話番号','メールアドレス','生年月日','肌タイプ','お悩み','店舗コード','LINE_userId','LINE流入日時','ステータス','メモ','登録日時','最終更新'];
+  var needsHeader = !headers[0] || headers[0] !== '顧客ID';
+  if (needsHeader) {
+    sheet.getRange(1, 1, 1, 15).setValues([expected]);
+    console.log('ヘッダー初期化完了');
+  }
+  return jsonResponse({ ok: true, message: 'DB初期化完了' });
+}
+
+function rebuildFromForms() {
+  initDB();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var dbSheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  var lastRow = dbSheet.getLastRow();
+  if (lastRow > 1) {
+    dbSheet.deleteRows(2, lastRow - 1);
+  }
+  var total = 0;
+  for (var f = 0; f < FORM_SHEETS_CONFIG.length; f++) {
+    var config = FORM_SHEETS_CONFIG[f];
+    var formSheet = ss.getSheetByName(config.sheetName);
+    if (!formSheet || formSheet.getLastRow() < 2) continue;
+    var rows = formSheet.getDataRange().getValues();
+    var headers = rows[0];
+    for (var i = 1; i < rows.length; i++) {
+      var mapped = mapFormRow(rows[i], headers, config.shopCode);
+      if (!mapped.customerName && !mapped.phone) continue;
+      var existing = mapped.phone ? findCustomerByPhone(mapped.phone) : null;
+      if (!existing && mapped.customerName) existing = findCustomerByName(mapped.customerName);
+      if (existing) {
+        updateCustomerFromForm(existing.rowIndex, mapped);
+      } else {
+        addNewCustomer(mapped);
+      }
+      total++;
+    }
+  }
+  return jsonResponse({ ok: true, totalRebuilt: total });
 }
 
 function linkLineIdByPhone(params) {
