@@ -1,8 +1,8 @@
 var SPREADSHEET_ID = '1CLYVwTISKxHFc583wFNCIIQ_unLFwqjHS-SxOPTYXgE';
 var CUSTOMER_DB_SHEET = '顧客DB';
 var FORM_SHEETS_CONFIG = [
-  { sheetName: '西船橋店オンダリフト', shopCode: 'ONDARI_NISHIFUNA', shopLabel: '西船橋店 オンダリフト', lineChannel: 'LINE_NISHIFUNA' },
-  { sheetName: '西船橋店ピーリング', shopCode: 'PEELING_NISHIFUNA', shopLabel: '西船橋店 ピーリング', lineChannel: 'LINE_NISHIFUNA' }
+  { sheetName: '西船橋店オンダリフト', shopCode: 'ONDARI_NISHIFUNA', shopLabel: '西船橋 オンダリフト', lineChannel: 'LINE_NISHIFUNA' },
+  { sheetName: '西船橋店ピーリング', shopCode: 'PEELING_NISHIFUNA', shopLabel: '西船橋 ハーブピーリング', lineChannel: 'LINE_NISHIFUNA' }
 ];
 
 // ============================================================

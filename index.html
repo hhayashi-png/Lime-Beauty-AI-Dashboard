@@ -6,404 +6,187 @@
 <title>Lime Beauty 電子カルテ</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#f0f4f0;color:#1a1a1a;min-height:100vh}
-:root{--primary:#2d6a4f;--primary-light:#40916c;--primary-dark:#1b4332;--bg:#f0f4f0;--card:#fff;--border:#d8e4d8;--text:#1a1a1a;--text-sub:#666;--success:#2d6a4f;--error:#d32f2f;--warn:#f9a825}
-
-/* Header */
-.header{background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.header h1{font-size:18px;font-weight:700;letter-spacing:.5px}
-.header-sub{font-size:11px;opacity:.8}
-.btn-refresh{background:rgba(255,255,255,.2);border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:.2s}
-.btn-refresh:hover{background:rgba(255,255,255,.35)}
-
-/* Tabs */
-.tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:56px;z-index:99}
-.tab{flex:1;text-align:center;padding:12px 0;font-size:13px;font-weight:600;color:var(--text-sub);cursor:pointer;border-bottom:3px solid transparent;transition:.2s}
-.tab.active{color:var(--primary);border-bottom-color:var(--primary);background:#f0f8f0}
-
-/* Content */
-.content{padding:12px;max-width:800px;margin:0 auto}
-.tab-content{display:none}
-.tab-content.active{display:block}
-
-/* Search */
-.search-bar{display:flex;gap:8px;margin-bottom:12px}
-.search-bar input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none}
-.search-bar input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(45,106,79,.15)}
-
-/* Cards */
-.card{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:.2s;border-left:4px solid var(--primary)}
-.card:hover{box-shadow:0 3px 12px rgba(0,0,0,.1);transform:translateY(-1px)}
-.card-name{font-size:16px;font-weight:700;color:var(--primary-dark)}
-.card-furigana{font-size:11px;color:var(--text-sub);margin-bottom:2px}
-.card-meta{display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--text-sub);flex-wrap:wrap}
-.card-meta span{display:flex;align-items:center;gap:3px}
-.line-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
-.line-badge.connected{background:#e8f5e9;color:#2e7d32}
-.line-badge.disconnected{background:#fce4ec;color:#c62828}
-.status-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#e3f2fd;color:#1565c0}
-
-/* Modal */
-.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto}
-.modal-overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:600px;margin:20px auto;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)}
-.modal-header{background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.modal-header h2{font-size:16px}
-.modal-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:0 4px}
-.modal-body{padding:20px;max-height:70vh;overflow-y:auto}
-.detail-row{display:flex;border-bottom:1px solid #f0f0f0;padding:10px 0}
-.detail-label{width:100px;font-size:12px;color:var(--text-sub);font-weight:600;flex-shrink:0}
-.detail-value{flex:1;font-size:14px;word-break:break-all}
-
-/* Form Data Card */
-.form-card{border-left-color:var(--primary-light)}
-.form-card .card-shop{font-size:11px;background:#e8f5e9;color:var(--primary);padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
-
-/* LINE Tab */
-.line-section{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.line-section label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:6px}
-.line-section select,.line-section textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
-.line-section select:focus,.line-section textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(45,106,79,.15)}
-.btn-send{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
-.btn-send:hover{background:var(--primary-dark)}
-.btn-send:disabled{background:#ccc;cursor:not-allowed}
-.line-empty{text-align:center;padding:40px;color:var(--text-sub)}
-
-/* Toast */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%}
-.toast.show{opacity:1}
-.toast.success{background:var(--success)}
-.toast.error{background:var(--error)}
-.toast.warn{background:var(--warn);color:#333}
-
-/* Loading */
-.loading{text-align:center;padding:40px;color:var(--text-sub)}
-.loading::after{content:'';display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-left:8px;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Empty */
-.empty{text-align:center;padding:40px;color:var(--text-sub)}
-.empty-icon{font-size:40px;margin-bottom:8px}
-
-/* Count */
-.count-badge{font-size:12px;color:var(--text-sub);margin-bottom:8px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#f8fdf9;color:#1a1a1a;min-height:100vh;font-size:15px}
+:root{--pri:#2d6a4f;--pri-l:#52b788;--pri-d:#1b4332;--bg:#f8fdf9;--card:#fff;--bdr:#d8e4d8;--sub:#666;--ok:#2d6a4f;--err:#d32f2f;--warn:#f9a825}
+.header{background:linear-gradient(135deg,var(--pri-d),var(--pri));color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.header h1{font-size:17px;font-weight:700}.header-sub{font-size:11px;opacity:.8}
+.btn-ref{background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:13px;cursor:pointer}
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--bdr);position:sticky;top:52px;z-index:99;overflow-x:auto}
+.tab{flex:1;min-width:0;text-align:center;padding:10px 4px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tab.active{color:var(--pri);border-bottom-color:var(--pri);background:#f0f8f0}
+.content{padding:12px;max-width:800px;margin:0 auto}.tp{display:none}.tp.active{display:block}
+.search-bar{display:flex;gap:8px;margin-bottom:10px}
+.search-bar input,.search-bar select{flex:1;padding:9px 12px;border:1px solid var(--bdr);border-radius:8px;font-size:14px;outline:none}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(45,106,79,.12)}
+.card{background:var(--card);border-radius:12px;padding:13px 15px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.05);cursor:pointer;border-left:4px solid var(--pri);transition:.15s}
+.card:hover{box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.card-name{font-size:15px;font-weight:700;color:var(--pri-d)}.card-kana{font-size:11px;color:var(--sub);margin-bottom:1px}
+.card-meta{display:flex;gap:10px;margin-top:5px;font-size:12px;color:var(--sub);flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-ok{background:#e8f5e9;color:#2e7d32}.badge-ng{background:#eee;color:#999}.badge-st{background:#e3f2fd;color:#1565c0}
+.modal-ov{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto}
+.modal-ov.show{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:600px;margin:16px auto;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-h{background:linear-gradient(135deg,var(--pri-d),var(--pri));color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.modal-h h2{font-size:15px}.modal-x{background:none;border:none;color:#fff;font-size:22px;cursor:pointer}
+.modal-b{padding:16px;max-height:72vh;overflow-y:auto}
+.dr{display:flex;border-bottom:1px solid #f0f0f0;padding:9px 0}.dl{width:95px;font-size:12px;color:var(--sub);font-weight:600;flex-shrink:0}.dv{flex:1;font-size:14px;word-break:break-all}
+.form-card{border-left-color:var(--pri-l)}
+.form-shop{font-size:11px;background:#e8f5e9;color:var(--pri);padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px}
+.line-sec{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.line-sec label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:5px}
+.line-sec select,.line-sec textarea,.line-sec input{width:100%;padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
+.btn-main{width:100%;padding:13px;background:var(--pri);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}.btn-main:hover{background:var(--pri-d)}.btn-main:disabled{background:#ccc;cursor:not-allowed}
+.btn-sub{padding:8px 16px;background:var(--pri-l);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:11px 22px;border-radius:10px;color:#fff;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%}
+.toast.show{opacity:1}.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}.toast.warn{background:var(--warn);color:#333}
+.loading{text-align:center;padding:36px;color:var(--sub)}.loading::after{content:'';display:inline-block;width:22px;height:22px;border:3px solid var(--bdr);border-top-color:var(--pri);border-radius:50%;animation:sp .7s linear infinite;margin-left:8px;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:36px;color:var(--sub)}.empty-icon{font-size:36px;margin-bottom:8px}
+.cnt{font-size:12px;color:var(--sub);margin-bottom:6px}
+.photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.photo-thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:20px;text-align:center}
+.contract-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;border-left:4px solid var(--pri-l);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.contract-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
+textarea.memo-area{width:100%;padding:10px;border:1px solid var(--bdr);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;min-height:80px;margin-top:8px}
 </style>
 </head>
 <body>
-
 <div class="header">
-  <div>
-    <h1>🌿 Lime Beauty</h1>
-    <div class="header-sub">電子カルテ ダッシュボード</div>
-  </div>
-  <button class="btn-refresh" onclick="refreshCurrentTab()">🔄 更新</button>
+  <div><h1>Lime Beauty</h1><div class="header-sub">電子カルテ</div></div>
+  <button class="btn-ref" onclick="refreshTab()">🔄 更新</button>
 </div>
-
 <div class="tabs">
-  <div class="tab active" data-tab="customers" onclick="switchTab('customers')">👥 顧客一覧</div>
-  <div class="tab" data-tab="forms" onclick="switchTab('forms')">📋 カウンセリング</div>
-  <div class="tab" data-tab="line" onclick="switchTab('line')">💬 LINE送信</div>
+  <div class="tab active" data-tab="cust" onclick="sw('cust')">👥 顧客一覧</div>
+  <div class="tab" data-tab="form" onclick="sw('form')">📋 カウンセリング</div>
+  <div class="tab" data-tab="cont" onclick="sw('cont')">📄 契約管理</div>
+  <div class="tab" data-tab="line" onclick="sw('line')">💬 LINE送信</div>
 </div>
-
-<!-- Tab 1: 顧客一覧 -->
 <div class="content">
-  <div id="tab-customers" class="tab-content active">
-    <div class="search-bar">
-      <input type="text" id="customer-search" placeholder="🔍 名前・電話番号で検索..." oninput="filterCustomers()">
-    </div>
-    <div class="count-badge" id="customer-count"></div>
-    <div id="customer-list"><div class="loading">顧客データを読み込み中</div></div>
+  <!-- Tab1: 顧客一覧 -->
+  <div id="t-cust" class="tp active">
+    <div class="search-bar"><input id="s-cust" placeholder="🔍 名前・電話番号で検索" oninput="fCust()"></div>
+    <div class="cnt" id="c-cust"></div>
+    <div id="l-cust"><div class="loading">読み込み中</div></div>
   </div>
-
-  <!-- Tab 2: カウンセリング -->
-  <div id="tab-forms" class="tab-content">
+  <!-- Tab2: カウンセリング -->
+  <div id="t-form" class="tp">
     <div class="search-bar">
-      <input type="text" id="form-search" placeholder="🔍 名前で検索..." oninput="filterForms()">
+      <select id="f-shop" onchange="fForm()"><option value="all">全店舗</option></select>
+      <input id="s-form" placeholder="🔍 名前で検索" oninput="fForm()">
     </div>
-    <div class="count-badge" id="form-count"></div>
-    <div id="form-list"><div class="loading">フォームデータを読み込み中</div></div>
+    <div class="cnt" id="c-form"></div>
+    <div id="l-form"><div class="loading">読み込み中</div></div>
   </div>
-
-  <!-- Tab 3: LINE送信 -->
-  <div id="tab-line" class="tab-content">
-    <div id="line-content"></div>
+  <!-- Tab3: 契約管理 -->
+  <div id="t-cont" class="tp">
+    <div class="line-sec" style="margin-bottom:12px">
+      <label>顧客を選択</label>
+      <select id="cont-cust" onchange="loadContracts()"></select>
+      <label>新規契約登録</label>
+      <input type="date" id="cont-date">
+      <label>コース</label>
+      <select id="cont-course" onchange="calcTotal()"></select>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><label>単価 (税込)</label><input type="number" id="cont-price" placeholder="0" oninput="calcTotal()"></div>
+        <div style="flex:1"><label>回数</label><input type="number" id="cont-sessions" placeholder="0" oninput="calcTotal()"></div>
+      </div>
+      <div style="font-size:16px;font-weight:700;color:var(--pri);margin:8px 0" id="cont-total">合計: ¥0</div>
+      <label>支払方法</label>
+      <select id="cont-pay"><option>現金</option><option>カード</option><option>分割</option></select>
+      <label>備考</label>
+      <input id="cont-note" placeholder="備考">
+      <button class="btn-main" onclick="addCont()">📄 契約を登録</button>
+    </div>
+    <div class="cnt" id="c-cont">契約履歴</div>
+    <div id="l-cont"></div>
+  </div>
+  <!-- Tab4: LINE送信 -->
+  <div id="t-line" class="tp">
+    <div id="line-body"></div>
   </div>
 </div>
-
 <!-- Modal -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modal-title">詳細</h2>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-  </div>
+<div class="modal-ov" id="modal" onclick="if(event.target===this)cModal()">
+  <div class="modal"><div class="modal-h"><h2 id="m-title">詳細</h2><button class="modal-x" onclick="cModal()">&times;</button></div><div class="modal-b" id="m-body"></div></div>
 </div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxUBsEzbrUcEZepMfAgEt34jIK3DQjYhDzXA1VFvSP4xvcM5BuW_u_qt4GClxzjBdp9/exec';
+const GAS=  'https://script.google.com/macros/s/AKfycbxUBsEzbrUcEZepMfAgEt34jIK3DQjYhDzXA1VFvSP4xvcM5BuW_u_qt4GClxzjBdp9/exec';
+const COURSES=[
+  {label:'オンダリフト 3回券',sessions:3,unitPrice:0},{label:'オンダリフト 5回券',sessions:5,unitPrice:0},{label:'オンダリフト 10回券',sessions:10,unitPrice:0},
+  {label:'ハーブピーリング 3回券',sessions:3,unitPrice:0},{label:'ハーブピーリング 5回券',sessions:5,unitPrice:0},{label:'ハーブピーリング 10回券',sessions:10,unitPrice:0},
+  {label:'その他',sessions:0,unitPrice:0}
+];
+let custs=[],forms=[],curTab='cust';
+async function callGAS(a,p={}){let u=GAS+'?action='+a;Object.keys(p).forEach(k=>{u+='&'+encodeURIComponent(k)+'='+encodeURIComponent(p[k])});const r=await fetch(u);const j=await r.json();if(!j.ok)throw new Error(j.data?.error||j.error||'GAS error');return j.data;}
 
-let customers = [];
-let formData = [];
+// === Tab Switch ===
+function sw(t){curTab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('active',e.dataset.tab===t));document.querySelectorAll('.tp').forEach(e=>e.classList.remove('active'));document.getElementById('t-'+t).classList.add('active');
+if(t==='cust'&&!custs.length)ldCust();if(t==='form'&&!forms.length)ldForm();if(t==='cont')initCont();if(t==='line')renderLine();}
+function refreshTab(){if(curTab==='cust'){custs=[];ldCust();}if(curTab==='form'){forms=[];ldForm();}if(curTab==='cont'){custs=[];ldCust().then(initCont);}if(curTab==='line'){custs=[];ldCust().then(renderLine);}}
 
-// ============================================================
-// GAS API
-// ============================================================
-async function callGAS(action, params = {}) {
-  let url = GAS_API_URL + '?action=' + action;
-  Object.keys(params).forEach(k => {
-    url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-  });
-  const res = await fetch(url);
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.data?.error || json.error || 'GAS error');
-  return json.data;
-}
+// === Tab1: 顧客一覧 ===
+async function ldCust(){const el=document.getElementById('l-cust');el.innerHTML='<div class="loading">読み込み中</div>';try{custs=await callGAS('getCustomers');rCust(custs);}catch(e){el.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div>読み込み失敗</div>';toast(e.message,'err');}}
+function rCust(list){const el=document.getElementById('l-cust');document.getElementById('c-cust').textContent=list.length+'件';if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div>顧客なし</div>';return;}
+el.innerHTML=list.map((c,i)=>`<div class="card" onclick="dCust(${i})"><div class="card-kana">${esc(c.furigana)}</div><div class="card-name">${esc(c.name)}</div><div class="card-meta"><span>📞 ${esc(c.phone||'未登録')}</span>${c.lineUserId?'<span class="badge badge-ok">LINE連携済</span>':'<span class="badge badge-ng">未連携</span>'}<span class="badge badge-st">${esc(c.status||'新規')}</span></div></div>`).join('');}
+function fCust(){const q=(document.getElementById('s-cust').value||'').toLowerCase();if(!q){rCust(custs);return;}rCust(custs.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.furigana||'').toLowerCase().includes(q)||(c.phone||'').includes(q)));}
+function dCust(i){const c=custs[i];if(!c)return;document.getElementById('m-title').textContent=c.name+' 様';const cn=Array.isArray(c.concerns)?c.concerns:(c.concerns?String(c.concerns).split(/[\/、,]/).map(s=>s.trim()).filter(Boolean):[]);
+document.getElementById('m-body').innerHTML=[dr('顧客ID',c.id),dr('氏名',c.name),dr('よみがな',c.furigana),dr('電話番号',c.phone),dr('メール',c.email),dr('生年月日',c.birthdate),dr('年齢',c.age?c.age+'歳':''),dr('肌タイプ',c.skinType),dr('お悩み',cn.join('、')),dr('店舗',c.shop),dr('LINE ID',c.lineUserId||'未設定'),dr('LINE流入',c.lineInflowDate),dr('ステータス',c.status),dr('メモ',c.memo),dr('登録日',c.registeredDate)].join('');
+document.getElementById('modal').classList.add('show');}
 
-// ============================================================
-// Tab Switching
-// ============================================================
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'customers' && customers.length === 0) loadCustomers();
-  if (tab === 'forms' && formData.length === 0) loadForms();
-  if (tab === 'line') renderLineTab();
-}
+// === Tab2: カウンセリング ===
+async function ldForm(){const el=document.getElementById('l-form');el.innerHTML='<div class="loading">読み込み中</div>';try{forms=await callGAS('getRawFormData');buildShopFilter();fForm();}catch(e){el.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div>読み込み失敗</div>';toast(e.message,'err');}}
+function buildShopFilter(){const sel=document.getElementById('f-shop');const shops=new Set();forms.forEach(f=>{if(f._shopLabel)shops.add(f._shopLabel);});sel.innerHTML='<option value="all">全店舗</option>'+[...shops].map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');}
+function fForm(){const shop=document.getElementById('f-shop').value;const q=(document.getElementById('s-form').value||'').toLowerCase();let list=forms;if(shop!=='all')list=list.filter(f=>f._shopLabel===shop);if(q)list=list.filter(f=>Object.values(f).join(' ').toLowerCase().includes(q));rForm(list);}
+function rForm(list){const el=document.getElementById('l-form');document.getElementById('c-form').textContent=list.length+'件';if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div>回答なし</div>';return;}
+el.innerHTML=list.map((f,i)=>{const nm=gName(f);const ph=fv(f,['電話','TEL']);return`<div class="card form-card" onclick="dForm(${i})"><div class="card-name">${esc(nm)}</div><div class="card-meta"><span>📞 ${esc(ph||'未記入')}</span><span class="form-shop">${esc(f._shopLabel||'')}</span></div></div>`;}).join('');}
+function dForm(i){const f=forms[i];if(!f)return;document.getElementById('m-title').textContent='カウンセリング詳細';const skip=['_shopCode','_lineChannel'];const key=gName(f)+'_'+fv(f,['電話','TEL']);
+let html=Object.keys(f).filter(k=>!skip.includes(k)&&f[k]).map(k=>{const lb=k.startsWith('_')?k.slice(1):k;return dr(lb,f[k]);}).join('');
+// メモ
+const saved=localStorage.getItem('memo_'+key)||'';html+='<div style="margin-top:12px"><label style="font-weight:600;font-size:13px;color:var(--sub)">スタッフメモ</label><textarea class="memo-area" id="form-memo" placeholder="メモを入力...">'+esc(saved)+'</textarea><button class="btn-sub" onclick="saveMemo(\''+esc(key)+'\')">💾 メモ保存</button></div>';
+// 写真
+const photos=JSON.parse(localStorage.getItem('photos_'+key)||'[]');html+='<div style="margin-top:12px"><label style="font-weight:600;font-size:13px;color:var(--sub)">写真 <span id="photo-cnt">'+photos.length+'/10枚</span></label><div><label class="btn-sub" style="display:inline-block;margin-top:6px;cursor:pointer">📷 写真を追加<input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(this,\''+esc(key)+'\')"></label></div><div class="photo-grid" id="photo-grid"></div></div>';
+document.getElementById('m-body').innerHTML=html;document.getElementById('modal').classList.add('show');renderPhotos(key);}
+function saveMemo(key){const v=document.getElementById('form-memo').value;localStorage.setItem('memo_'+key,v);toast('メモ保存しました','ok');}
+function addPhotos(input,key){const photos=JSON.parse(localStorage.getItem('photos_'+key)||'[]');if(photos.length>=10){toast('最大10枚です','warn');return;}
+Array.from(input.files).forEach(file=>{if(photos.length>=10)return;const reader=new FileReader();reader.onload=function(e){photos.push(e.target.result);localStorage.setItem('photos_'+key,JSON.stringify(photos));renderPhotos(key);};reader.readAsDataURL(file);});}
+function renderPhotos(key){const photos=JSON.parse(localStorage.getItem('photos_'+key)||'[]');const grid=document.getElementById('photo-grid');if(!grid)return;const cnt=document.getElementById('photo-cnt');if(cnt)cnt.textContent=photos.length+'/10枚';
+grid.innerHTML=photos.map((p,i)=>'<div class="photo-thumb"><img src="'+p+'"><button class="photo-del" onclick="delPhoto(\''+esc(key)+'\','+i+')">×</button></div>').join('');}
+function delPhoto(key,idx){const photos=JSON.parse(localStorage.getItem('photos_'+key)||'[]');photos.splice(idx,1);localStorage.setItem('photos_'+key,JSON.stringify(photos));renderPhotos(key);}
 
-function refreshCurrentTab() {
-  const active = document.querySelector('.tab.active');
-  if (!active) return;
-  const tab = active.dataset.tab;
-  if (tab === 'customers') { customers = []; loadCustomers(); }
-  if (tab === 'forms') { formData = []; loadForms(); }
-  if (tab === 'line') { customers = []; loadCustomers().then(() => renderLineTab()); }
-}
+// === Tab3: 契約管理 ===
+function initCont(){const sel=document.getElementById('cont-cust');sel.innerHTML=custs.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'（'+esc(c.phone||'')+'）</option>').join('');
+const cs=document.getElementById('cont-course');cs.innerHTML=COURSES.map((c,i)=>'<option value="'+i+'">'+esc(c.label)+'</option>').join('');
+document.getElementById('cont-date').value=new Date().toISOString().split('T')[0];calcTotal();loadContracts();}
+function calcTotal(){const ci=parseInt(document.getElementById('cont-course').value)||0;const course=COURSES[ci];const sess=document.getElementById('cont-sessions');if(course&&course.sessions)sess.value=course.sessions;
+const price=parseInt(document.getElementById('cont-price').value)||0;const s=parseInt(sess.value)||0;document.getElementById('cont-total').textContent='合計: ¥'+(price*s).toLocaleString();}
+async function addCont(){const cid=document.getElementById('cont-cust').value;const ci=parseInt(document.getElementById('cont-course').value)||0;const course=COURSES[ci];
+const data={customerId:cid,contractDate:document.getElementById('cont-date').value,courseName:course.label,sessions:document.getElementById('cont-sessions').value,amount:(parseInt(document.getElementById('cont-price').value)||0)*parseInt(document.getElementById('cont-sessions').value||0),paymentMethod:document.getElementById('cont-pay').value,note:document.getElementById('cont-note').value};
+try{await callGAS('addContract',{data:JSON.stringify(data)});toast('契約を登録しました','ok');loadContracts();}catch(e){toast('登録失敗: '+e.message,'err');}}
+async function loadContracts(){const cid=document.getElementById('cont-cust').value;if(!cid){document.getElementById('l-cont').innerHTML='';return;}
+try{const list=await callGAS('getContracts',{customerId:cid});const el=document.getElementById('l-cont');if(!list||!list.length){el.innerHTML='<div class="empty">契約履歴なし</div>';return;}
+el.innerHTML=list.map(c=>'<div class="contract-card"><div class="contract-row"><span><b>'+esc(c.courseName)+'</b></span><span>'+esc(c.status||'有効')+'</span></div><div class="contract-row"><span>回数: '+c.sessions+'回</span><span>¥'+(c.amount||0).toLocaleString()+'</span></div><div class="contract-row"><span>'+esc(c.paymentMethod||'')+'</span><span>'+esc(c.contractDate||'')+'</span></div>'+(c.note?'<div style="font-size:12px;color:var(--sub);margin-top:4px">'+esc(c.note)+'</div>':'')+'</div>').join('');}catch(e){document.getElementById('l-cont').innerHTML='<div class="empty">取得失敗</div>';}}
 
-// ============================================================
-// Tab 1: 顧客一覧
-// ============================================================
-async function loadCustomers() {
-  const el = document.getElementById('customer-list');
-  el.innerHTML = '<div class="loading">顧客データを読み込み中</div>';
-  try {
-    const data = await callGAS('getCustomers');
-    customers = Array.isArray(data) ? data : [];
-    renderCustomers(customers);
-  } catch (err) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>読み込みに失敗しました</div>';
-    showToast('顧客データの取得に失敗: ' + err.message, 'error');
-  }
-}
+// === Tab4: LINE送信 ===
+function renderLine(){const el=document.getElementById('line-body');const lc=custs.filter(c=>c.lineUserId);
+if(!lc.length){el.innerHTML='<div class="line-sec"><div class="empty"><div class="empty-icon">💬</div>LINE連携済みの顧客がいません<div style="font-size:12px;margin-top:6px;color:#999">LINE友だち追加→電話番号送信で連携されます</div></div></div>';return;}
+el.innerHTML='<div class="line-sec"><label>送信先</label><select id="line-to">'+lc.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'（'+esc(c.phone||'')+'）</option>').join('')+'</select><label>テンプレート</label><select id="line-tpl" onchange="applyTpl()"><option value="">カスタム</option><option value="thanks">お礼メッセージ</option><option value="follow">フォローアップ</option></select><label>メッセージ</label><textarea id="line-msg" rows="5" placeholder="送信メッセージを入力"></textarea><button class="btn-main" id="line-btn" onclick="sendLine()">💬 LINE送信</button></div>';}
+function applyTpl(){const tpl=document.getElementById('line-tpl').value;const ta=document.getElementById('line-msg');if(tpl==='thanks')ta.value='本日はご来店いただきありがとうございます！\nまたのお越しをお待ちしております。';else if(tpl==='follow')ta.value='先日はご来店ありがとうございました。\nお肌の調子はいかがですか？\n気になることがあればお気軽にご連絡ください。';else ta.value='';}
+async function sendLine(){const cid=document.getElementById('line-to').value;const msg=document.getElementById('line-msg').value.trim();if(!msg){toast('メッセージを入力してください','warn');return;}
+const btn=document.getElementById('line-btn');btn.disabled=true;btn.textContent='送信中...';try{const r=await callGAS('sendLine',{customerId:cid,message:msg});toast((r.sentTo||'')+'さんに送信しました','ok');document.getElementById('line-msg').value='';}catch(e){toast('送信失敗: '+e.message,'err');}finally{btn.disabled=false;btn.textContent='💬 LINE送信';}}
 
-function renderCustomers(list) {
-  const el = document.getElementById('customer-list');
-  document.getElementById('customer-count').textContent = list.length + '件の顧客';
-  if (list.length === 0) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>顧客が見つかりません</div>';
-    return;
-  }
-  el.innerHTML = list.map((c, i) => `
-    <div class="card" onclick="showCustomerDetail(${i})">
-      <div class="card-furigana">${esc(c.furigana || '')}</div>
-      <div class="card-name">${esc(c.name)}</div>
-      <div class="card-meta">
-        <span>📞 ${esc(c.phone || '未登録')}</span>
-        <span>${c.lineUserId ? '<span class="line-badge connected">LINE連携済</span>' : '<span class="line-badge disconnected">LINE未連携</span>'}</span>
-        <span class="status-badge">${esc(c.status || '新規')}</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterCustomers() {
-  const q = (document.getElementById('customer-search').value || '').toLowerCase();
-  if (!q) { renderCustomers(customers); return; }
-  const filtered = customers.filter(c =>
-    (c.name || '').toLowerCase().includes(q) ||
-    (c.furigana || '').toLowerCase().includes(q) ||
-    (c.phone || '').includes(q)
-  );
-  renderCustomers(filtered);
-}
-
-function showCustomerDetail(idx) {
-  const c = customers[idx];
-  if (!c) return;
-  document.getElementById('modal-title').textContent = c.name + ' 様';
-  const concerns = Array.isArray(c.concerns) ? c.concerns : (c.concerns ? String(c.concerns).split(/[\/、,]/).map(s=>s.trim()).filter(Boolean) : []);
-  document.getElementById('modal-body').innerHTML = `
-    ${detailRow('顧客ID', c.id)}
-    ${detailRow('氏名', c.name)}
-    ${detailRow('よみがな', c.furigana)}
-    ${detailRow('電話番号', c.phone)}
-    ${detailRow('メール', c.email)}
-    ${detailRow('生年月日', c.birthdate)}
-    ${detailRow('年齢', c.age ? c.age + '歳' : '')}
-    ${detailRow('肌タイプ', c.skinType)}
-    ${detailRow('お悩み', concerns.join('、'))}
-    ${detailRow('店舗', c.shop)}
-    ${detailRow('LINE ID', c.lineUserId || '未設定')}
-    ${detailRow('LINE流入', c.lineInflowDate)}
-    ${detailRow('ステータス', c.status)}
-    ${detailRow('メモ', c.memo)}
-    ${detailRow('登録日', c.registeredDate)}
-  `;
-  document.getElementById('modal').classList.add('show');
-}
-
-// ============================================================
-// Tab 2: カウンセリング
-// ============================================================
-async function loadForms() {
-  const el = document.getElementById('form-list');
-  el.innerHTML = '<div class="loading">フォームデータを読み込み中</div>';
-  try {
-    const data = await callGAS('getRawFormData');
-    formData = Array.isArray(data) ? data : [];
-    renderForms(formData);
-  } catch (err) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>読み込みに失敗しました</div>';
-    showToast('フォームデータの取得に失敗: ' + err.message, 'error');
-  }
-}
-
-function renderForms(list) {
-  const el = document.getElementById('form-list');
-  document.getElementById('form-count').textContent = list.length + '件の回答';
-  if (list.length === 0) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>フォーム回答がありません</div>';
-    return;
-  }
-  el.innerHTML = list.map((f, i) => {
-    const name = getFormName(f);
-    const phone = findFormValue(f, ['電話','TEL','携帯']);
-    return `
-      <div class="card form-card" onclick="showFormDetail(${i})">
-        <div class="card-name">${esc(name.trim() || '名前なし')}</div>
-        <div class="card-meta">
-          <span>📞 ${esc(phone || '未記入')}</span>
-          <span class="card-shop">${esc(f._shopLabel || '')}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function filterForms() {
-  const q = (document.getElementById('form-search').value || '').toLowerCase();
-  if (!q) { renderForms(formData); return; }
-  const filtered = formData.filter(f => {
-    const vals = Object.values(f).join(' ').toLowerCase();
-    return vals.includes(q);
-  });
-  renderForms(filtered);
-}
-
-function showFormDetail(idx) {
-  const f = formData[idx];
-  if (!f) return;
-  document.getElementById('modal-title').textContent = 'フォーム回答詳細';
-  const skip = ['_shopCode', '_lineChannel'];
-  document.getElementById('modal-body').innerHTML = Object.keys(f)
-    .filter(k => !skip.includes(k) && f[k])
-    .map(k => {
-      const label = k.startsWith('_') ? k.replace('_', '') : k;
-      return detailRow(label, f[k]);
-    }).join('');
-  document.getElementById('modal').classList.add('show');
-}
-
-function getFormName(row) {
-  var sei = row['お名前（姓）'] || row['姓'] || '';
-  var mei = row['お名前（名）'] || row['名'] || '';
-  if (sei && mei) return sei + ' ' + mei;
-  if (sei) return sei;
-  if (mei) return mei;
-  return row['お名前'] || row['氏名'] || '名前未入力';
-}
-
-function findFormValue(obj, keys) {
-  for (const k of Object.keys(obj)) {
-    for (const search of keys) {
-      if (k.includes(search)) return obj[k] || '';
-    }
-  }
-  return '';
-}
-
-// ============================================================
-// Tab 3: LINE送信
-// ============================================================
-function renderLineTab() {
-  const el = document.getElementById('line-content');
-  const lineCustomers = customers.filter(c => c.lineUserId);
-  if (lineCustomers.length === 0) {
-    el.innerHTML = '<div class="line-empty"><div style="font-size:40px;margin-bottom:12px">💬</div><div>LINE連携済みの顧客がいません</div><div style="font-size:12px;margin-top:8px;color:#999">顧客がLINE友だち追加後、電話番号を送信すると連携されます</div></div>';
-    return;
-  }
-  el.innerHTML = `
-    <div class="line-section">
-      <label>送信先</label>
-      <select id="line-customer">
-        ${lineCustomers.map(c => `<option value="${c.id}">${esc(c.name)}（${esc(c.phone || 'TELなし')}）</option>`).join('')}
-      </select>
-      <label>メッセージ</label>
-      <textarea id="line-message" rows="5" placeholder="送信するメッセージを入力..."></textarea>
-      <button class="btn-send" id="btn-line-send" onclick="sendLine()">💬 LINE送信</button>
-    </div>
-  `;
-}
-
-async function sendLine() {
-  const customerId = document.getElementById('line-customer').value;
-  const message = document.getElementById('line-message').value.trim();
-  if (!message) { showToast('メッセージを入力してください', 'warn'); return; }
-  const btn = document.getElementById('btn-line-send');
-  btn.disabled = true;
-  btn.textContent = '送信中...';
-  try {
-    const result = await callGAS('sendLine', { customerId, message });
-    showToast(result.sentTo + ' さんに送信しました ✅', 'success');
-    document.getElementById('line-message').value = '';
-  } catch (err) {
-    showToast('送信失敗: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '💬 LINE送信';
-  }
-}
-
-// ============================================================
-// Utilities
-// ============================================================
-function detailRow(label, value) {
-  return `<div class="detail-row"><div class="detail-label">${esc(label)}</div><div class="detail-value">${esc(value || '—')}</div></div>`;
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('show');
-}
-
-function esc(s) {
-  if (s === null || s === undefined) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function showToast(msg, type = 'success') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast ' + type + ' show';
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-// Init
-document.addEventListener('DOMContentLoaded', () => loadCustomers());
+// === Utilities ===
+function gName(r){const s=r['お名前（姓）']||r['姓']||'';const m=r['お名前（名）']||r['名']||'';if(s&&m)return s+' '+m;if(s)return s;if(m)return m;return r['お名前']||r['氏名']||'名前未入力';}
+function fv(o,ks){for(const k of Object.keys(o))for(const s of ks)if(k.includes(s))return o[k]||'';return'';}
+function dr(l,v){return'<div class="dr"><div class="dl">'+esc(l)+'</div><div class="dv">'+esc(v||'—')+'</div></div>';}
+function cModal(){document.getElementById('modal').classList.remove('show');}
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(m,t='ok'){const el=document.getElementById('toast');el.textContent=m;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3000);}
+document.addEventListener('DOMContentLoaded',()=>ldCust());
 </script>
 </body>
 </html>
