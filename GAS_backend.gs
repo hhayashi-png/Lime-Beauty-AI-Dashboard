@@ -897,3 +897,12 @@ function setupProperties() {
   console.log('プロパティ設定完了');
   return { ok:true };
 }
+
+function diagToken() {
+  var token = getToken();
+  console.log('TOKEN存在: ' + (token ? 'あり（長さ:' + token.length + '）' : 'なし'));
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+  console.log('スプレッドシート接続: ' + (sheet ? 'OK' : 'NG'));
+  console.log('顧客DB行数: ' + sheet.getLastRow());
+}
