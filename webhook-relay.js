@@ -21,7 +21,7 @@ async function handleRequest(request) {
   if (request.method === 'POST') {
     try {
       const url = new URL(request.url);
-      const shop = url.searchParams.get('shop') || 'NISHIFUNA';
+      const shop = url.searchParams.get('shop') || 'ONDARI_NISHIFUNA';
       const body = await request.text();
 
       const gasUrl = GAS_URL + '?shop=' + encodeURIComponent(shop);

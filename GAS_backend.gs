@@ -6,16 +6,16 @@ var CUSTOMER_DB_SHEET = '顧客DB';
 
 var SHOPS = [
   {
-    code:      'NISHIFUNA_ONDARI',
+    code:      'ONDARI_NISHIFUNA',
     label:     '西船橋 オンダリフト',
     sheetName: '西船橋店オンダリフト',
-    webhook:   'NISHIFUNA_ONDARI'
+    aliases:   ['NISHIFUNA_ONDARI', 'NISHIFUNA', 'ONDARI']
   },
   {
-    code:      'NISHIFUNA_PEELING',
+    code:      'PEELING_NISHIFUNA',
     label:     '西船橋 ハーブピーリング',
     sheetName: '西船橋店ピーリング',
-    webhook:   'NISHIFUNA_PEELING'
+    aliases:   ['NISHIFUNA_PEELING', 'PEELING']
   }
 ];
 
@@ -77,7 +77,9 @@ function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
     if (body.events) {
-      var shopCode = (e.parameter && e.parameter.shop) ? e.parameter.shop : SHOPS[0].code;
+      var rawShop = (e.parameter && e.parameter.shop) ? e.parameter.shop : '';
+      var resolvedShop = getShopByCode(rawShop);
+      var shopCode = resolvedShop ? resolvedShop.code : SHOPS[0].code;
       body.events.forEach(function(ev) {
         if (ev.type === 'follow')  handleFollowEvent(ev, shopCode);
         if (ev.type === 'message') handleMessageEvent(ev);
@@ -643,7 +645,12 @@ function findCustomerByFormTS(ts) {
 // ショップ設定ユーティリティ
 // ============================================================
 function getShopByCode(code) {
-  return SHOPS.filter(function(s){ return s.code === code; })[0] || null;
+  if (!code) return SHOPS[0]; // デフォルトは1番目の店舗
+  for (var i = 0; i < SHOPS.length; i++) {
+    if (SHOPS[i].code === code) return SHOPS[i];
+    if (SHOPS[i].aliases && SHOPS[i].aliases.indexOf(code) >= 0) return SHOPS[i];
+  }
+  return SHOPS[0]; // 見つからない場合もデフォルト（エラーにしない）
 }
 
 function getShopBySheetName(name) {
