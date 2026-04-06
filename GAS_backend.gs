@@ -146,8 +146,28 @@ function rebuildFromForms() {
   initDB();
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var dbSheet = ss.getSheetByName(CUSTOMER_DB_SHEET);
+
+  // 既存のLINE ID情報を退避（消えないように保護）
+  var existingData = dbSheet.getDataRange().getValues();
+  var lineIdMap = {}; // phone -> {lineId, lineDt}
+  var tsLineIdMap = {}; // formTS -> {lineId, lineDt}
+  for (var i = 1; i < existingData.length; i++) {
+    var row = existingData[i];
+    var lineId = String(row[COL.LINE_ID] || '');
+    if (!lineId) continue;
+    var phone = String(row[COL.PHONE] || '').replace(/[-\s]/g,'');
+    var ts = String(row[COL.FORM_TS] || '');
+    var lineDt = row[COL.LINE_DT] || '';
+    if (phone) lineIdMap[phone] = { lineId: lineId, lineDt: lineDt };
+    if (ts) tsLineIdMap[ts] = { lineId: lineId, lineDt: lineDt };
+  }
+  console.log('LINE ID退避完了: ' + Object.keys(lineIdMap).length + '件');
+
+  // DBをクリア（ヘッダーは残す）
   var lastRow = dbSheet.getLastRow();
   if (lastRow > 1) dbSheet.deleteRows(2, lastRow - 1);
+
+  // フォームから再構築
   var total = 0;
   SHOPS.forEach(function(shop) {
     var formSheet = ss.getSheetByName(shop.sheetName);
@@ -158,10 +178,39 @@ function rebuildFromForms() {
       var ts = rows[i][0] ? String(rows[i][0]) : '';
       var mapped = mapFormRow(rows[i], headers, shop.code);
       if (!mapped.customerName && !mapped.phone) continue;
-      addNewCustomer(mapped, ts);
+
+      // LINE IDを復元（フォームTSまたは電話番号で照合）
+      var savedLine = null;
+      if (ts && tsLineIdMap[ts]) {
+        savedLine = tsLineIdMap[ts];
+      } else if (mapped.phone) {
+        var normPhone = mapped.phone.replace(/[-\s]/g,'');
+        var norm10 = normPhone.replace(/^0/,'');
+        for (var p in lineIdMap) {
+          if (p === normPhone || p.replace(/^0/,'') === norm10) {
+            savedLine = lineIdMap[p];
+            break;
+          }
+        }
+      }
+
+      var newId = addNewCustomer(mapped, ts);
+      if (savedLine && savedLine.lineId) {
+        var data2 = dbSheet.getDataRange().getValues();
+        for (var k = 1; k < data2.length; k++) {
+          if (String(data2[k][COL.ID]) === String(newId)) {
+            dbSheet.getRange(k+1, COL.LINE_ID+1).setValue(savedLine.lineId);
+            if (savedLine.lineDt) dbSheet.getRange(k+1, COL.LINE_DT+1).setValue(savedLine.lineDt);
+            console.log('LINE ID復元: ' + newId + ' -> ' + savedLine.lineId);
+            break;
+          }
+        }
+      }
       total++;
     }
   });
+
+  console.log('rebuildFromForms完了: ' + total + '件（LINE ID保持）');
   return jsonResponse({ ok: true, totalRebuilt: total });
 }
 
